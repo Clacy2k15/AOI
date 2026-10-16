@@ -23,4 +23,4 @@ if ($AssetsDirectory) {
 }
 Run-Python -Arguments @('deployment/initialize_runtime.py')
 Run-Python -Arguments @('deployment/check_runtime.py')
-Write-Host 'Setup complete. Run: .\start-demo.ps1'
+Write-Host 'Setup complete. Run: powershell -NoProfile -ExecutionPolicy Bypass -File .\start-demo.ps1'

@@ -10,7 +10,7 @@
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
-.\start-demo.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\start-demo.ps1
 ```
 
 第一次安裝需要網路，會下載固定版本的 Python 套件及 GitHub Release 模型分段，核對 SHA256、解壓並自動設定本機路徑。模型分段總量以 `release-manifest.json` 為準；建議預留至少 35 GB 空間供模型、下載暫存與套件使用。
@@ -22,14 +22,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 若自動下載失敗，可從本版本 GitHub Release 下載**所有** `aoi-runtime.zip.partNNN` 到同一資料夾，再執行：
 
 ```powershell
-.\setup.ps1 -AssetsDirectory 'D:\AOI-release-assets'
+powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1 -AssetsDirectory 'D:\AOI-release-assets'
 ```
 
 完全離線的新電腦還需要 Python 3.12 安裝程式、驅動及相同 Windows x64／Python 3.12 平台的 wheelhouse。可先在有網路的相同平台準備：
 
 ```powershell
 py -3.12 -m pip wheel --extra-index-url https://download.pytorch.org/whl/cu126 -r requirements.e5.lock.txt --wheel-dir wheelhouse
-.\setup.ps1 -Offline -AssetsDirectory 'D:\AOI-release-assets'
+powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1 -Offline -AssetsDirectory 'D:\AOI-release-assets'
 ```
 
 wheelhouse 不包含於本次模型 Release；完全離線安裝尚待在另一台乾淨電腦驗證。模型下載完成後可保留或自行移除 `.downloads` 中的分段暫存。若搬動已安裝的資料夾，應重建 `.venv` 並重新執行 setup；Python venv 不保證可搬移。
