@@ -2,6 +2,8 @@
 
 使用已訓練的 EfficientAD、PatchCore 與微調 Qwen3.5-4B，在本機對新圖片判定 OK／NG、定位疑似瑕疵及分類。15 類產品需由使用者選擇；新圖片應具有與訓練資料相近的拍攝方式、尺寸和背景。
 
+v1.0.1 為全部 24 個 Python 檔案加入詳細中文註釋，涵蓋 134 個類別／函式／方法及重要演算法區塊；模型資源沿用 v1.0.0。
+
 ## 下載與啟動（Windows）
 
 1. 安裝 **Python 3.12 x64**，保留 Windows `py` launcher，並安裝適用於你的 NVIDIA 顯示卡驅動。此版本使用 CUDA，尚未提供 CPU／macOS 版本。原開發機為 RTX 4070；其他顯示卡與顯存需求尚未逐一驗證。
@@ -19,7 +21,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\start-demo.ps1
 
 ## 手動下載／完全離線安裝
 
-若自動下載失敗，可從本版本 GitHub Release 下載**所有** `aoi-runtime.zip.partNNN` 到同一資料夾，再執行：
+若自動下載失敗，可從 [v1.0.0 模型 Release](https://github.com/Clacy2k15/AOI/releases/tag/v1.0.0) 下載**所有** `aoi-runtime.zip.partNNN` 到同一資料夾，再執行：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1 -AssetsDirectory 'D:\AOI-release-assets'
@@ -43,18 +45,38 @@ wheelhouse 不包含於本次模型 Release；完全離線安裝尚待在另一�
 
 metal_nut 使用 `configs/aoi.yaml`／`configs/inference.yaml`；其他產品使用 `configs/products/<product>/`。輸出包括疊圖、遮罩、JSON、CSV。只要偵測與定位，可加 `--detectors-only` 並略過 Qwen 服務啟動。GUI 與 CLI 共用相同 pipeline。
 
+## 程式碼閱讀順序
+
+建議從 [GUI 入口](scripts/demo.py) 或 [CLI 入口](scripts/predict.py) 開始，再看 [完整 pipeline](aoi/pipeline.py)。所有 Python 檔案均直接附上中文註釋，包含輸入／輸出、重要變數、計算原理及錯誤處理。
+
+| 內容 | 對應原始碼 |
+|---|---|
+| 設定繼承、檔案路徑與成果身分 | `aoi/common.py` |
+| 一般模型載入、RGB／張量與前處理 | `aoi/inference.py`、`aoi/data.py`、`aoi/detectors.py`、`aoi/preprocessing.py` |
+| 雙模型 OR、原圖區域與 Qwen 紅圈 | `aoi/fusion.py`、`aoi/capsule_decision.py` |
+| capsule／pill 專屬 ROI 與部署校驗 | `aoi/capsule_roi.py`、`aoi/capsule_runtime.py`、`aoi/pill_roi.py`、`aoi/pill_runtime.py` |
+| 三圖提示、分類回應與 Qwen 程序管理 | `aoi/velm.py`、`scripts/start_qwen.py`、`scripts/integrate_products.py` |
+| 開發指標、PRO／AU-PRO 與像素門檻 | `aoi/evaluation.py`、`aoi/pixel_calibration.py` |
+| 離線限制、下載、路徑初始化與啟動自檢 | `aoi/offline.py`、`deployment/` |
+
+已安裝 v1.0.0 的使用者若只更新原始碼，請執行下列指令同步註釋版的前處理程式校驗值；不需重新訓練：
+
+```powershell
+.\.venv\Scripts\python.exe deployment\initialize_runtime.py
+.\.venv\Scripts\python.exe deployment\check_runtime.py
+```
+
 ## 發佈內容與限制
 
 - 程式碼放在 Git；大型模型透過固定版本的 GitHub Release 分段提供，不使用 Git LFS。
 - 僅包含各產品目前採用的 checkpoint、Qwen Q6_K／mmproj、llama.cpp b11609、15 張正常參考圖及執行所需設定。capsule／pill 包含正式採用的 ROI 模型與校正 bundle。
 - 不包含完整 MVTec 訓練／測試影像、Imagenette、訓練中間權重、微調環境、雲端設定或歷史推論紀錄。本發佈用途為新圖片推論；不能直接用它重做整份測試報告。
 - 原始權重保持不變；安裝程式只將部署 JSON 的路徑換成本機位置並更新 capsule／pill bundle 的檔案校驗值，不重新訓練或校正門檻。
-- 此版本不承諾更換 GPU、驅動或套件後逐位元相同的輸出，也不保證對不同產品／拍攝條件的泛化表現。
 
 ## 資料與第三方來源
 
 15 張正常參考圖來自 [MVTec AD](https://www.mvtec.com/research-teaching/datasets/mvtec-ad)，未修改，依 **CC BY-NC-SA 4.0** 提供，授權全文位於 `third_party/MVTec-AD-LICENSE.txt`；官方明確限制資料的商業用途。
 
-Qwen 基底為 [unsloth/Qwen3.5-4B](https://huggingface.co/unsloth/Qwen3.5-4B)，上游 [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B) 使用 Apache-2.0；本專案以視覺 LoRA 微調後合併並量化為 Q6_K，mmproj 配對匯出。llama.cpp 使用 MIT；相關文件位於 `third_party/`。其他套件保留各自授權。本倉庫未另行替作者選定原創程式碼與自訓權重的新授權；公開可下載不表示可任意再授權或商用。
+Qwen 基底為 [unsloth/Qwen3.5-4B](https://huggingface.co/unsloth/Qwen3.5-4B)，上游 [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B) 使用 Apache-2.0；本專案以視覺 LoRA 微調後合併並量化為 Q6_K，mmproj 配對匯出。llama.cpp 使用 MIT；相關文件位於 `third_party/`。其他套件保留各自授權。本倉庫未另行替作者選定原創程式碼與自訓權重的新授權。
 
 定位與提示參考 [VELM](https://github.com/Sassanmtr/VELM) 的顯式瑕疵描述與三圖輸入概念；實際提示與類別規則以產品設定為準。

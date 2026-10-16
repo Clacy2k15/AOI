@@ -127,7 +127,7 @@
         "comparison": "@AOI_ROOT@\\outputs\\capsule_roi_mask_align_20261016\\comparison.json"
       },
       "preprocessing": "@AOI_ROOT@\\outputs\\capsule_roi_mask_align_efficientad_20261016\\preprocessing.json",
-      "preprocessing_code_sha256": "2b7ac64110b7b35086ab940b5109455668f49e9a4069b84a64bf39f484d2331d",
+      "preprocessing_code_sha256": "38134af9bc8f795729b2140b314ffb6ea581086e830443a0bbf36d89206e998a",
       "source_sha256": {
         "outputs\\capsule_roi_mask_align_efficientad_20261016\\candidate_inference.json": "3455dd7fa598936c3c4d57febdecec7128ec83dd1958b4bd1ce50cd41c573a80",
         "outputs\\capsule_roi_mask_align_efficientad_20261016\\comparison.json": "c097e2696178de8f13afd76b5bb7daa7e129c7508d895870143a8827a79201d5",
@@ -231,7 +231,7 @@
       "checkpoint_sha256": "54996f2a66aaf2e2a131136647e9a795ae10d1b2ab60c843f0f4bb3793e9627a",
       "preprocessing": "@AOI_ROOT@\\outputs\\pill_roi_align_patchcore_20261016\\preprocessing.json",
       "preprocessing_sha256": "9435d5d3692faf0096e283ef7ba9ec43eaa300ee531d6123fb5042c81faa59d3",
-      "preprocessing_code_sha256": "ad57784f2bd8d66c3b69200fd5e2f4dec1c7c12710c9c7972c8ffab044065a9f",
+      "preprocessing_code_sha256": "9f61b44f6accdaff2e300703cc36c3546215771aa1b302c602a19254bd3e5389",
       "thresholds": {
         "efficientad": {
           "image": 0.3303241431713104,

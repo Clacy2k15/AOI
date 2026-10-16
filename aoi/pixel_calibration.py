@@ -1,3 +1,7 @@
+# 固定 dev 連續分數圖的區域等權 PRO／AU-PRO 分析與雙模型 OR 像素門檻校正。
+# PRO 是每個 GT 連通區域的覆蓋率平均；背景 FPR 以全部背景像素為分母。
+# AU-PRO 是跨門檻曲線面積；單一部署 pixel 門檻不會改變固定分數圖的 AU-PRO。
+
 """Region-weighted PRO calibration on original-coordinate frozen dev maps.
 
 AU-PRO is reported for the continuous single-detector maps, using a dense
@@ -11,26 +15,34 @@ import cv2
 import numpy as np
 
 
+# 將 GT mask 做 8 連通元件分割，回傳區域 labels、每像素權重及區域數。
+# 每個 GT 像素的權重是所屬區域面積的倒數，讓大小不同的瑕疵區在 PRO 中同權。
 def gt_regions(mask):
     truth = np.asarray(mask, dtype=bool)
     count, labels = cv2.connectedComponents(truth.astype(np.uint8), connectivity=8)
     areas = np.bincount(labels.ravel(), minlength=count)
     weights = np.zeros(truth.shape, dtype=np.float64)
+    # 每一區域的像素權重總和為 1；把被預測覆蓋的像素權重相加，就得到各區域覆蓋率總和。
     weights[truth] = 1.0 / areas[labels[truth]]
     return labels, weights, count - 1
 
 
+# 從背景分數分位數建立 float32 門檻候選，並納入 tied score 的兩側及全域端點。
+# extra 可放入舊門檻，方便在同一搜尋網格精確對照基準。
 def background_thresholds(background, all_min, all_max, fpr_values, extra=()):
     """Strict float32 quantile boundaries; equal scores enter/leave together."""
     quantiles = np.quantile(background, 1 - np.asarray(fpr_values), method='higher').astype(np.float32)
     # Include both sides of tied score events. Otherwise a large background tie
     # could be interpolated together with unrelated lower-scoring GT pixels.
+    # nextafter 取 float32 可表示的下一個值，精確區分 >= 門檻時同分像素的進出。
     values = np.concatenate([quantiles, np.nextafter(quantiles, np.float32(np.inf))])
     endpoints = [np.nextafter(np.float32(all_min), np.float32(-np.inf)),
                  np.nextafter(np.float32(all_max), np.float32(np.inf))]
     return np.unique(np.asarray([*values, *endpoints, *extra], dtype=np.float32))
 
 
+# 對 FPR 已遞增的 PRO 曲線，在指定 FPR limit 截斷、插值並以梯形積分。
+# 面積除以 limit 正規化到 0～1，另回報單調曲線上下界以揭露離散取樣誤差。
 def curve_integral(fpr, pro, limit):
     """Clip and normalize by the requested limit, preserving vertical events."""
     x, y = np.asarray(fpr, dtype=float), np.asarray(pro, dtype=float)
@@ -43,6 +55,7 @@ def curve_integral(fpr, pro, limit):
         if x1 <= x0:
             continue
         end = min(x1, limit)
+        # 若最後一段跨過積分上限，只線性插值到 limit，不把超過允許 FPR 的面積算進來。
         end_y = y0 + (y1 - y0) * (end - x0) / (x1 - x0)
         width = end - x0
         area += width * (y0 + end_y) / 2
@@ -58,6 +71,8 @@ def curve_integral(fpr, pro, limit):
             'threshold_independent': True}
 
 
+# 在單組二值遮罩下精確計算區域 PRO、背景 FPR、NG Dice／覆蓋率及逐圖像素統計。
+# 每個 GT 連通區域等權；正常圖沒有 GT 區域，但其背景 FP 仍計入 FPR。
 def point_metrics(masks, truths):
     regions = hits = image_misses = fp = background = 0
     pro_sum = 0.0
@@ -90,6 +105,8 @@ def point_metrics(masks, truths):
             'normal_mask_fraction_mean': float(np.mean(normal_area)) if normal_area else None, 'images': per_image}
 
 
+# 在固定 float32 原圖分數圖上搜尋 EA／PC 的 OR 像素門檻。
+# 先滿足背景 FPR budget，再最大化區域 PRO，接著最小化 FP、比較 NG Dice；另計算單模型 AU-PRO 曲線。
 def calibrate_pair(ea_maps, pc_maps, truths, baseline_pixels, *, budget=.01, limit=.30,
                    curve_quantiles=2001, low_fpr_quantiles=1001, joint_quantiles=161):
     if not 0 < budget <= limit <= 1:
@@ -102,6 +119,7 @@ def calibrate_pair(ea_maps, pc_maps, truths, baseline_pixels, *, budget=.01, lim
             raise ValueError('Invalid original-coordinate maps')
         if e.dtype != np.float32 or p.dtype != np.float32:
             raise ValueError('Expected frozen float32 detector maps')
+    # 兩模型各自收集相同 dev 背景母體的連續分數；GT 只用於開發分析，部署新圖不讀 GT。
     background = [np.concatenate([m[~g] for m, g in zip(maps, truths, strict=True)])
                   for maps in [ea_maps, pc_maps]]
     if not len(background[0]) or not any(g.any() for g in truths):
@@ -114,6 +132,7 @@ def calibrate_pair(ea_maps, pc_maps, truths, baseline_pixels, *, budget=.01, lim
                                                np.linspace(0, budget, low_fpr_quantiles)]))
         ct.append(background_thresholds(bg, low, high, curve_fprs))
     del background
+    # 雙模型候選門檻構成二維網格，後續用直方圖前綴和同時計算所有 OR 組合，減少逐組掃像素。
     shape = (len(jt[0]), len(jt[1]))
     fp = np.zeros(shape, dtype=np.int64)
     pro_sum = np.zeros(shape)
@@ -124,15 +143,18 @@ def calibrate_pair(ea_maps, pc_maps, truths, baseline_pixels, *, budget=.01, lim
     for e, p, g in zip(ea_maps, pc_maps, truths, strict=True):
         _, weights, nr = gt_regions(g)
         region_count += nr; ng_count += int(bool(nr)); background_count += int((~g).sum())
+        # searchsorted(side=right) 對應 >= 的邊界；兩模型分箱合併為一個二維直方圖索引。
         bins = [np.searchsorted(t, m.ravel(), side='right') for t, m in zip(jt, [e, p], strict=True)]
         pairs = bins[0] * (shape[1] + 1) + bins[1]
         dims = (shape[0] + 1, shape[1] + 1)
         bg_hist = np.bincount(pairs[~g.ravel()], minlength=np.prod(dims)).reshape(dims)
         fg_hist = np.bincount(pairs[g.ravel()], minlength=np.prod(dims)).reshape(dims)
         weighted = np.bincount(pairs[g.ravel()], weights=weights[g], minlength=np.prod(dims)).reshape(dims)
+        # OR 的補集合是「兩模型都低於門檻」；用背景總數減去雙向累積的這一區得到 FP。
         image_fp = int((~g).sum()) - bg_hist.cumsum(0).cumsum(1)[:-1, :-1]
         image_tp = int(g.sum()) - fg_hist.cumsum(0).cumsum(1)[:-1, :-1]
         fp += image_fp
+        # 區域總權重減去兩模型都漏掉的區域權重，就是 OR 覆蓋率總和。
         pro_sum += nr - weighted.cumsum(0).cumsum(1)[:-1, :-1]
         if nr:
             dice_sum += 2 * image_tp / (image_tp + image_fp + int(g.sum()))
@@ -143,18 +165,21 @@ def calibrate_pair(ea_maps, pc_maps, truths, baseline_pixels, *, budget=.01, lim
     pro = np.clip(pro_sum / region_count, 0, 1)
     fpr = fp / background_count
     dice = dice_sum / ng_count
+    # 把比例 budget 轉成整數背景 FP 上限後篩選可行點，不能只挑 PRO 高卻超過誤報預算的組合。
     feasible = fp <= int(np.floor(budget * background_count))
     best_pro = pro[feasible].max()
     eligible = feasible & (pro >= best_pro - 1e-10)
     best_fp = fp[eligible].min()
     eligible &= fp == best_fp
     choices = list(zip(*np.where(eligible), strict=True))
+    # PRO 與背景 FP 相同時才比較 NG Dice；最後以門檻索引總和作固定的同分規則。
     chosen = max(choices, key=lambda ij: (dice[ij], sum(ij)))
     pixels = [float(jt[k][chosen[k]]) for k in range(2)]
     baseline_masks = [(e >= baseline_pixels[0]) | (p >= baseline_pixels[1]) for e, p in zip(ea_maps, pc_maps, strict=True)]
     selected_masks = [(e >= pixels[0]) | (p >= pixels[1]) for e, p in zip(ea_maps, pc_maps, strict=True)]
     baseline = point_metrics(baseline_masks, truths)
     selected = point_metrics(selected_masks, truths)
+    # 重新從實際 OR 遮罩計算精確指標，核對加速網格計算與背景預算，避免搜尋公式錯誤。
     assert abs(selected['PRO'] - pro[chosen]) < 1e-8
     assert selected['FP_pixels'] == int(fp[chosen])
     assert selected['background_FPR'] <= budget
@@ -162,6 +187,7 @@ def calibrate_pair(ea_maps, pc_maps, truths, baseline_pixels, *, budget=.01, lim
     assert abs(baseline['PRO'] - pro[baseline_index]) < 1e-8
     curves, quality = {}, {}
     for k, name in enumerate(['efficientad', 'patchcore']):
+        # 門檻由高往低排列後，FPR 與 PRO 隨放寬門檻往上走，供指定上限的積分使用。
         x = (background_count - curve_bg[k].cumsum()[:-1])[::-1] / background_count
         y = np.clip((region_count - curve_region[k].cumsum()[:-1])[::-1] / region_count, 0, 1)
         curves[name] = {'thresholds': ct[k][::-1], 'FPR': x, 'PRO': y}

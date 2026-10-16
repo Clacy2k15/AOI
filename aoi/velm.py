@@ -1,3 +1,7 @@
+# 本機 llama.cpp 的三圖視覺分類介面：提示、類別 ID、輸出文法、HTTP 呼叫及程序身分核對。
+# 影像依正常參考／原始 query／紅圈 query 排列，以 PNG data URL 傳給 localhost，不需要雲端 API key。
+# classification_score 是答案 token 的未校正信心分數；它不等於整個瑕疵判斷正確的機率。
+
 """Local llama-server HTTP adapter. Vision/tokenization stay in llama.cpp."""
 from __future__ import annotations
 import base64
@@ -11,6 +15,8 @@ from aoi.common import ROOT, read_json
 from aoi.fusion import QWEN_CONTOUR_RENDERING, resize_qwen_image
 
 
+# 將產品、切分、Qwen 設定、權重檔身分、門檻、正常參考與紅圈版本組成分類指紋。
+# 權重以路徑、大小、mtime 辨認；這是快取一致性標記，不取代安裝時的完整檔案 SHA256。
 def classification_fingerprint(config: dict, settings: dict) -> str:
     import hashlib
     from aoi.common import artifact_identity
@@ -25,6 +31,7 @@ def classification_fingerprint(config: dict, settings: dict) -> str:
              'contour_rendering':QWEN_CONTOUR_RENDERING}
     return hashlib.sha256(json.dumps(value,sort_keys=True).encode()).hexdigest()
 
+# 以下是 metal_nut 的歷史預設映射／提示；其他產品在 product_options 以設定覆寫。
 LABELS = {"1": "bent", "2": "color", "3": "flip", "4": "scratch", "5": "unknown_defect"}
 SYSTEM_PROMPT = "Classify visible anomalies in industrial metal nuts using the supplied images and class definitions.\nYour final answer must contain exactly one digit from 1 to 5, with no other text."
 CLASS_PROMPT = """The detector may produce false alarms. Ignore the red annotation when judging physical color, shape, and surface marks.
@@ -41,6 +48,8 @@ Choose one class:
 Your final answer must contain exactly one digit from 1 to 5, with no other text."""
 
 
+# 把類別 ID 統一成字串，要求從 1 起連續、沒有前導零，而且恰有一個 unknown_defect。
+# 以完整十進位 ID 核對，避免多位數答案只被解析成第一個字元。
 def label_mapping(classification: dict | None = None) -> dict:
     labels = {str(k): v for k, v in (classification or {}).get("labels", LABELS).items()}
     if not labels or any(not k.isascii() or not k.isdecimal() or str(int(k)) != k for k in labels):
@@ -50,10 +59,14 @@ def label_mapping(classification: dict | None = None) -> dict:
     return labels
 
 
+# 將所有有效完整 ID 組成 GBNF 的 root 選項。
+# 每個 ID 都以 JSON 字串引用，因此多位數類別也能被當成完整輸出限制。
 def output_grammar(labels: dict) -> str:
     return 'root ::= ' + ' | '.join(json.dumps(k) for k in sorted(labels, key=int))
 
 
+# 建立產品專用的 system 提示，要求只回傳一個有效類別 ID。
+# metal_nut 使用既有固定內容，其餘產品依各自映射生成，不共用錯誤的瑕疵名稱。
 def system_prompt(product: str, labels: dict) -> str:
     if product == "metal_nut" and labels == LABELS:
         return SYSTEM_PROMPT
@@ -61,11 +74,14 @@ def system_prompt(product: str, labels: dict) -> str:
             "Return exactly one class ID from " + ", ".join(sorted(labels, key=int)) + ", with no other text.")
 
 
+# 複製 Qwen 設定，補齊產品、映射、system prompt、class prompt 及輸出文法。
+# 優先使用明確指定的 prompt；否則由正常描述與各瑕疵描述生成，保留 unknown 的保守選項。
 def product_options(options: dict, product: str, classification: dict | None = None) -> dict:
     options = dict(options)
     labels = label_mapping(classification)
     if product != "metal_nut" and classification is None:
         raise ValueError("New products require their own classification mapping")
+    # 明確 prompt 的優先權高於由描述自動組裝的提示；空白 prompt 直接拒絕，避免模型收到不完整規則。
     if classification and classification.get("prompt") is not None:
         prompt = classification["prompt"]
         if not isinstance(prompt, str) or not prompt.strip():
@@ -91,6 +107,8 @@ def product_options(options: dict, product: str, classification: dict | None = N
     return options
 
 
+# 把三張圖及各自文字說明組成多模態訊息清單，供推論／微調沿用相同順序。
+# image_item 是影像轉換函式；傳入的內容不含 query 檔名或 GT 類別資訊。
 def classification_content(reference, query, contour, localization_status, image_item, class_prompt=CLASS_PROMPT,
                            product="metal_nut"):
     """Share the exact image order and instructions with the vision fine-tune."""
@@ -103,6 +121,8 @@ def classification_content(reference, query, contour, localization_status, image
             {"type": "text", "text": "Localization status: " + localization_status + ".\n" + class_prompt}]
 
 
+# 解析第一個候選答案，拒絕因長度截斷或不在映射內的內容。
+# 若後端提供 label token logprob／prob 就取出信心；缺少時保留 None，不自行補值。
 def parse_response(response: dict, labels: dict | None = None) -> dict:
     labels = label_mapping({"labels": labels}) if labels is not None else LABELS
     choice = response["choices"][0]
@@ -110,6 +130,7 @@ def parse_response(response: dict, labels: dict | None = None) -> dict:
     if choice.get("finish_reason") == "length" or answer not in labels:
         raise ValueError("Invalid/truncated final class answer: " + repr(answer))
     score, source = None, None
+    # 優先尋找與完整答案相符的 token logprob，再用 exp 轉回 token 分數；未提供時走後端另一種格式。
     probabilities = (choice.get("logprobs") or {}).get("content", [])
     for token in probabilities:
         if (token.get("token") or "").strip() == answer and token.get("logprob") is not None:
@@ -127,6 +148,8 @@ def parse_response(response: dict, labels: dict | None = None) -> dict:
             "usage": response.get("usage"), "backend_response": response, "error": None}
 
 
+# 依保存 PID 讀取 Windows 程序的真實命令列，核對執行檔與完整 GGUF／mmproj 路徑。
+# PID 可能已結束或被重用，不能只靠 PID 存在就信任，更不能因此誤停其他程序。
 def recorded_server_command(record: dict) -> str:
     """Read the recorded Windows process command, guarding stale/unrelated PIDs."""
     import ctypes
@@ -141,6 +164,7 @@ def recorded_server_command(record: dict) -> str:
             raise RuntimeError("Recorded Qwen PID is not running")
         raise RuntimeError("Cannot access recorded Qwen PID; do not assume it stopped")
     try:
+        # ProcessCommandLineInformation 的查詢需要先取得緩衝區長度，再配置空間讀取內容。
         query = ctypes.WinDLL("ntdll").NtQueryInformationProcess
         query.argtypes = [wintypes.HANDLE, wintypes.ULONG, ctypes.c_void_p, wintypes.ULONG,
                           ctypes.POINTER(wintypes.ULONG)]
@@ -151,11 +175,14 @@ def recorded_server_command(record: dict) -> str:
         buffer = ctypes.create_string_buffer(size.value)
         if query(handle, 60, buffer, size.value, ctypes.byref(size)) != 0:
             raise RuntimeError("Unable to verify Qwen process command line")
+        # 對應 Windows UNICODE_STRING 的記憶體布局：兩個位元組長度欄位及字串指標。
+        # length 的單位是位元組，讀取 UTF-16 寬字元時需除以 2。
         class UnicodeString(ctypes.Structure):
             _fields_ = [("length", wintypes.USHORT), ("maximum", wintypes.USHORT), ("data", ctypes.c_void_p)]
         value = UnicodeString.from_buffer(buffer)
         command = ctypes.wstring_at(value.data, value.length // 2)
         # Use Windows' existing argv parser, then compare complete path arguments.
+        # 交給 Windows 自己解析帶空白／引號的命令列，避免以字串切割錯認模型路徑。
         shell = ctypes.WinDLL("shell32")
         shell.CommandLineToArgvW.argtypes = [wintypes.LPCWSTR, ctypes.POINTER(ctypes.c_int)]
         shell.CommandLineToArgvW.restype = ctypes.POINTER(wintypes.LPWSTR)
@@ -168,6 +195,7 @@ def recorded_server_command(record: dict) -> str:
         finally:
             kernel.LocalFree.argtypes = [ctypes.c_void_p]
             kernel.LocalFree(pointer)
+        # 比較解析後的完整路徑，而不是只找模型檔名片段，防止同名檔或 PID 重用混淆。
         if Path(argv[0]).resolve() != Path(record['executable']).resolve():
             raise RuntimeError("Recorded Qwen PID has a different executable")
         for flag in ["--model","--mmproj"]:
@@ -179,6 +207,8 @@ def recorded_server_command(record: dict) -> str:
         kernel.CloseHandle(handle)
 
 
+# 核對程序命令列與當前產品設定，再向本機 /props 確認實際服務的 GGUF 路徑。
+# 同時約束保存的程序與回應的 HTTP 服務，避免連到另一份已載入的權重。
 def verify_server_model(options: dict) -> None:
     record = read_json(ROOT / "outputs/qwen_server_process.json")
     command = recorded_server_command(record)
@@ -193,6 +223,8 @@ def verify_server_model(options: dict) -> None:
         raise RuntimeError("The responding Qwen server has different GGUF weights")
 
 
+# 重新確認程序身分後送出 SIGTERM，並等待同一程序 handle 最長 30 秒退出。
+# 無法確認或未退出就報錯，不啟動另一份可能爭用 GPU 的工作。
 def stop_recorded_server(record: dict) -> None:
     """Terminate only a verified project PID and wait for its actual exit."""
     import ctypes
@@ -216,7 +248,11 @@ def stop_recorded_server(record: dict) -> None:
         kernel.CloseHandle(handle)
 
 
+# 把 Qwen 設定封裝成可重複分類的 localhost HTTP client。
+# 首次請求會驗證服務模型；此類別只負責分類，不改寫偵測器的 OK／NG 判決。
 class VELMClient:
+    # 保存已解析的提示與類別映射，並要求 endpoint 是 loopback 的 HTTP 位址。
+    # 新產品必須有自己的 labels 與 class_prompt，不可默默套用 metal_nut 的預設映射。
     def __init__(self, options: dict):
         self.options = options
         if options.get("product","metal_nut") != "metal_nut" and (not options.get("labels") or not options.get("class_prompt")):
@@ -227,6 +263,8 @@ class VELMClient:
         if endpoint.hostname not in {"127.0.0.1", "localhost", "::1"} or endpoint.scheme != "http":
             raise ValueError("Classification endpoint must be local HTTP")
 
+    # 依長邊限制等比例縮圖、RGB 轉 BGR 後編碼 PNG，再包成 base64 data URL。
+    # PNG 是傳輸格式，真正的視覺 tokenizer 與投影由原生 llama.cpp／mmproj 執行。
     def _image(self, rgb) -> dict:
         import cv2
         image = resize_qwen_image(rgb, self.options["image_long_edge"])
@@ -235,11 +273,14 @@ class VELMClient:
             raise ValueError("OpenCV could not encode PNG")
         return {"type": "image_url", "image_url": {"url": "data:image/png;base64," + base64.b64encode(png).decode("ascii")}}
 
+    # 建立三圖提示及固定取樣參數，送到 /v1/chat/completions，回傳解析後分類紀錄。
+    # HTTP 失敗與答案解析失敗分開處理；收到的無效答案仍保存原始回應，不追加重試來挑選結果。
     def classify(self, reference, query, contour, localization_status: str) -> dict:
         content = classification_content(reference, query, contour, localization_status, self._image,
                                          self.options.get("class_prompt", CLASS_PROMPT),
                                          product=self.options.get("product", "metal_nut"))
         options = self.options
+        # grammar 限制答案集合；temperature 等參數沿用產品設定，logprobs 僅用於顯示未校正的 token 信心。
         payload = {"model": "aoi-qwen", "messages": [{"role": "system", "content": options.get("system_prompt", SYSTEM_PROMPT)},
                                                       {"role": "user", "content": content}],
                    "chat_template_kwargs": {"enable_thinking": False}, "reasoning_effort": "none",
@@ -257,6 +298,7 @@ class VELMClient:
                                              data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(request, timeout=options["request_timeout_seconds"]) as stream:
                 response = json.load(stream)
+        # 這個例外分支涵蓋服務身分／連線／回應讀取失敗，回傳 unknown＋failed 供 pipeline 記錄。
         except Exception as error:
             return {"defect_type": "unknown_defect", "classification_status": "failed", "classification_score": None,
                     "classification_score_source": None, "classification_score_calibrated": False,

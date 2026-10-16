@@ -1,3 +1,7 @@
+# GUI 與 CLI 共用的完整推論主流程。輸入是使用者選定產品與一張影像，輸出是可追溯結果紀錄。
+# 流程：載入兩模型 → RGB／前處理 → 各自推論 → 回映原圖 → OR 判決／定位 → NG 分類 → 保存。
+# OK／NG 由偵測器決定；unknown 或分類失敗不會把已判 NG 的影像改成 OK。
+
 """One load/predict/output pipeline shared by the CLI and a future GUI."""
 from __future__ import annotations
 import csv
@@ -15,7 +19,11 @@ from aoi.fusion import combine, contour_image, qwen_localization, qwen_contour_i
 from aoi.velm import VELMClient, classification_fingerprint
 
 
+# 管理某個產品的已載入模型、正常參考圖、Qwen client 與結果保存。
+# 同一實例可處理多張圖；切換產品應關閉舊實例，避免權重與門檻交叉使用。
 class Pipeline:
+    # 先啟用離線限制，核對產品及校正設定，再依一般／capsule ROI／pill ROI 路徑載入模型。
+    # classify 控制分類；reuse_dev_results 僅供固定 dev 的已保存結果，不能拿來推論任意新圖。
     def __init__(self, config: dict, inference_path: str | Path | None = None, classify: bool = True,
                  reuse_dev_results: bool = False, split: str = 'dev'):
         from aoi.offline import enable_offline
@@ -35,14 +43,17 @@ class Pipeline:
         self.reference = load_rgb(ROOT / self.settings["normal_reference"])
         self.reuse_dev_results = reuse_dev_results
         self.classify_enabled = classify
+        # toothbrush 的已採用規則只有 defective 一種瑕疵；NG 可直接映射，不送 Qwen 也不捏造分類信心。
         self.single_defect_class = ('defective' if classify and self.product == 'toothbrush'
             and set(self.settings['qwen']['labels'].values()) == {'defective', 'unknown_defect'} else None)
         self.efficientad = self.patchcore = None
         self.cached_classifications = {}
         capsule_pair = self.product == 'capsule' and self.settings.get('capsule_model_pair', {}).get('enabled')
         pill_patchcore = self.product == 'pill' and self.settings.get('pill_patchcore', {}).get('enabled')
+        # ROI 模型的座標與分數配方已改變，不能把舊一般模型的 dev 快取當成新 ROI 推論結果。
         if (capsule_pair or pill_patchcore) and reuse_dev_results:
             raise ValueError('The adopted ROI detector requires live inference; legacy detector/classification caches are incompatible')
+        # 這條支線只核對並重用開發成果；精簡發佈包沒有完整快取，新圖片應走下面的實際模型路徑。
         if reuse_dev_results:
             from aoi.inference import existing_dev_predictions
             from aoi.common import read_json
@@ -66,6 +77,7 @@ class Pipeline:
                 self.efficientad = CapsuleDetector(config, 'efficientad', self.settings)
                 try:
                     self.patchcore = CapsuleDetector(config, self.group, self.settings)
+                # 若第二個模型載入失敗，先釋放已載入的第一個，避免建構失敗仍占住顯存。
                 except Exception:
                     self.efficientad.close()
                     raise
@@ -82,16 +94,20 @@ class Pipeline:
                     raise
         self.client = VELMClient(self.settings["qwen"]) if classify and not reuse_dev_results and not self.single_defect_class else None
 
+    # 對單張本機影像執行偵測、定位、分類與輸出，回傳包含狀態、分數、區域、檔案及耗時的 dict。
+    # 每張圖都有獨立目錄；一般執行錯誤寫成 REVIEW 紀錄，方便批次繼續處理其他影像。
     def predict(self, input_path: str | Path, output_dir: str | Path | None = None) -> dict:
         from aoi.inference import load_rgb
 
         started = time.perf_counter()
         input_path = Path(input_path).resolve()
+        # sample_id 依輸入絕對路徑及產品產生，主要用於隔離輸出目錄；它不是影像內容 SHA256。
         key = str(input_path) if self.product == "metal_nut" else self.product + ":" + str(input_path)
         sample_id = hashlib.sha256(key.encode()).hexdigest()[:16]
         output_dir = output_dir or output_path(self.config, "predictions")
         directory = ROOT / output_dir / sample_id
         directory.mkdir(parents=True, exist_ok=True)
+        # 先初始化為 REVIEW／failed，只有後續步驟成功才逐項填入結果，避免未完成影像被誤認為 OK。
         record = {"sample_id": sample_id, "input_path": str(input_path), "product": self.product,
                   "identity": self.identity,
                   "patchcore_variant": self.group, "score_efficientad": None, "score_patchcore": None,
@@ -107,6 +123,7 @@ class Pipeline:
             digest = None
             if self.reuse_dev_results:
                 key = str(input_path).casefold()
+                # cache-only 額外核對影像位元組，即使檔名一樣，只要內容不同就不可沿用已保存的分類。
                 digest = hashlib.sha256(input_path.read_bytes()).hexdigest()
                 if self.classify_enabled and not self.single_defect_class and digest not in self.cached_classifications:
                     raise ValueError('Input bytes do not match a saved fixed-dev classification sample')
@@ -128,6 +145,7 @@ class Pipeline:
             else:
                 ea = self.efficientad.predict(rgb)
                 pc = self.patchcore.predict(rgb)
+            # 保留兩個模型的原始分數，不把不同量尺的分數相加或假裝是同一種機率。
             record.update(score_efficientad=ea["score"], score_patchcore=pc["score"])
             record["preprocessing"] = {"efficientad": ea["metadata"], "patchcore": pc["metadata"]}
             for label, result in [("efficientad", ea), ("patchcore", pc)]:
@@ -135,9 +153,11 @@ class Pipeline:
                 record["timings_ms"][label] = result["inference_ms"]
                 record["timings_ms"][label + "_remap"] = result["remap_ms"]
             fusion_start = time.perf_counter()
+            # combine 產生對外 OR 判決與遮罩；qwen_localization 另外選紅圈來源，不反過來更改判決。
             fused = combine(ea, pc, self.settings["thresholds"])
             qloc = qwen_localization(ea, pc, self.settings['thresholds'],
                                      self.settings['qwen'].get('mask_source', 'OR'), fused)
+            # 布林大陣列另存成 PNG／npz，不直接塞進 JSON；其餘可序列化欄位合併進 record。
             mask = fused.pop("mask")
             record.update(fused)
             contour = contour_image(rgb, mask)
@@ -150,6 +170,7 @@ class Pipeline:
                                                  'image_size_hw': list(qwen_contour.shape[:2])})
             record["timings_ms"]["fusion"] = (time.perf_counter() - fusion_start) * 1000
             qwen_start = time.perf_counter()
+            # 正常圖跳過分類；這個 good 來自兩個偵測器皆未達影像門檻，不是 Qwen 重新判定。
             if record["decision"] == "OK":
                 record.update(defect_type="good", classification_status="skipped_ok")
             elif self.single_defect_class:
@@ -164,6 +185,7 @@ class Pipeline:
                 record['result_reuse']['original_qwen_ms'] = saved['inference_ms']
             elif self.client:
                 # Original RGB/reference; red contours are drawn at Qwen's input resolution.
+                # 三圖依序是正常參考、原始 query、紅圈 query；即使沒有定位仍可提供完整 query 分類。
                 classification = self.client.classify(self.reference, rgb, qwen_contour, qloc['localization_status'])
                 response = classification.pop("backend_response", None)
                 if response is not None:
@@ -176,6 +198,7 @@ class Pipeline:
             record["timings_ms"]["qwen"] = (time.perf_counter() - qwen_start) * 1000 if record["decision"] == "NG" else 0.0
             output_start = time.perf_counter()
             overlay = contour.copy()
+            # bbox 的右／下界原本是不含端點，OpenCV rectangle 則包含端點，所以繪圖時使用 x2-1／y2-1。
             for region in record["regions"]:
                 x1, y1, x2, y2 = region["bbox_xyxy"]
                 cv2.rectangle(overlay, (x1, y1), (x2 - 1, y2 - 1), (255, 60, 0), 1)
@@ -186,6 +209,7 @@ class Pipeline:
             cv2.putText(overlay, title[:110], (8, 22), cv2.FONT_HERSHEY_SIMPLEX, .45,
                         (40, 255, 40) if record["decision"] == "OK" else (255, 100, 100), 1)
             cv2.putText(overlay, "localization=" + record["localization_status"], (8, 44), cv2.FONT_HERSHEY_SIMPLEX, .45, (230, 230, 230), 1)
+            # OpenCV imwrite 需要 BGR；內部處理保留 RGB，因此僅在存 PNG 的邊界轉換通道順序。
             for name, image in [("contour", contour), ("overlay", overlay)]:
                 path = directory / (name + ".png")
                 if not cv2.imwrite(str(path), cv2.cvtColor(image, cv2.COLOR_RGB2BGR)):
@@ -201,17 +225,22 @@ class Pipeline:
             record["artifacts"]["mask"] = str(mask_path)
             # Raw maps allow stage C to reuse predictions for the identical sample/settings.
             map_path = directory / "anomaly_maps.npz"
+            # 保存連續原始分數圖，讓後續分析可區分模型輸出與門檻二值化效果。
             np.savez_compressed(map_path, efficientad=ea["map"], patchcore=pc["map"])
             record["artifacts"]["anomaly_maps"] = str(map_path)
             record["timings_ms"]["output"] = (time.perf_counter() - output_start) * 1000
+        # 偵測／定位／寫檔的例外會轉為 REVIEW 並附上錯誤；Qwen 自身失敗由 client 回傳 failed，仍保留 NG。
         except Exception as error:
             record.update(decision="REVIEW", defect_type="unknown_defect", classification_status="failed",
                           error=f"{type(error).__name__}: {error}")
         record["timings_ms"]["total"] = (time.perf_counter() - started) * 1000
         record["artifacts"]["json"] = str(directory / "result.json")
+        # 單張 JSON 在 finally 之外統一保存；若此最後寫入也失敗，例外會向外傳遞，不能宣稱成果已落盤。
         write_json(directory / "result.json", record)
         return record
 
+    # 釋放已建立的 EfficientAD 與 PatchCore adapter。
+    # Qwen 是外部共用程序，不在此任意終止；程序管理交由啟動／停止工具核對身分後處理。
     def close(self):
         if self.efficientad is not None:
             self.efficientad.close()
@@ -219,6 +248,8 @@ class Pipeline:
             self.patchcore.close()
 
 
+# 保存整批完整 results.json 及便於表格分析的 results.csv。
+# CSV 使用 utf-8-sig 讓 Excel 辨識中文；多個 bbox 以 JSON 字串放在單一欄位中。
 def save_records(records: list[dict], output_dir: str | Path) -> None:
     directory = ROOT / output_dir
     directory.mkdir(parents=True, exist_ok=True)

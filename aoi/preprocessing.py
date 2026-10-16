@@ -1,3 +1,7 @@
+# 三組固定前處理：P0 只縮放；PG 嘗試剛性對齊；PD 在亮度通道降噪並增強對比。
+# OpenCV 尺寸參數採 (width, height)，而 NumPy shape／設定採 [height, width]，不可混用。
+# 回傳的 metadata 記錄座標轉換，異常圖須先回到原圖座標才套用像素門檻及融合。
+
 """Fixed OpenCV recipes; scores/maps remain raw for stage B calibration."""
 from __future__ import annotations
 
@@ -8,6 +12,8 @@ import cv2
 import numpy as np
 
 
+# 以 Otsu 二值化及最大外輪廓建立保守的工件外形遮罩。
+# 只使用 query 影像，不讀 GT；用途是檢查 metal_nut 對齊後是否會把工件裁掉。
 def _foreground(rgb: np.ndarray) -> np.ndarray:
     """A conservative exterior silhouette for detecting cropped metal nuts.
 
@@ -22,9 +28,13 @@ def _foreground(rgb: np.ndarray) -> np.ndarray:
     return result
 
 
+# 封裝訓練與推論共用的 P0／PG／PD 配方，保留正常參考圖作為對齊模板。
+# 幾何配方與亮度配方互斥，不會把兩種處理疊加成未經校正的新輸入。
 class OpenCVRecipe:
     """Resize once, then optionally align OR denoise/enhance, before normalize."""
 
+    # 核對組別，保存產品、輸入尺寸與配方，並將正常參考圖轉成灰階浮點模板。
+    # 模板與 query 必須以相同尺寸送進 ECC，避免矩陣座標單位不一致。
     def __init__(self, group: str, config: dict, reference_rgb: np.ndarray):
         if group not in {"P0", "PG", "PD"}:
             raise ValueError(group)
@@ -36,9 +46,12 @@ class OpenCVRecipe:
         template = cv2.resize(reference_rgb, (width, height), interpolation=cv2.INTER_LINEAR)
         self.template = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255
 
+    # 輸入原圖 RGB，產生固定大小的影像及完整幾何 metadata。
+    # PG 無安全依據或對齊失敗時回退縮放圖；PD 只改亮度，不刻意改變色彩通道的瑕疵線索。
     def __call__(self, rgb: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
         height, width = self.size
         image = cv2.resize(rgb, (width, height), interpolation=cv2.INTER_LINEAR)
+        # 2×3 單位仿射矩陣代表只有縮放後的同座標輸入，也是 PG 失敗時的回退紀錄。
         identity = np.eye(2, 3, dtype=np.float32)
         metadata = {
             "group": self.group,
@@ -52,6 +65,7 @@ class OpenCVRecipe:
         }
         if self.group == "PG":
             options = self.options["geometry"]
+            # 目前只有 metal_nut 的外形裁切保護已驗證；其他產品不可僅因設定 PG 就宣稱安全對齊。
             guard = options.get("crop_guard", "metal_nut_silhouette" if self.product == "metal_nut" else "unverified")
             if guard != "metal_nut_silhouette":
                 metadata.update(alignment_failed=True, crop_guard=guard,
@@ -59,6 +73,7 @@ class OpenCVRecipe:
                 return np.ascontiguousarray(image), metadata
             query = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255
             try:
+                # ECC 只允許旋轉與平移；matrix 的方向是 template／aligned → resized query。
                 correlation, matrix = cv2.findTransformECC(
                     self.template, query, identity.copy(), cv2.MOTION_EUCLIDEAN,
                     (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS,
@@ -74,6 +89,7 @@ class OpenCVRecipe:
                 fraction = options["max_translation_fraction"]
                 if abs(matrix[0, 2]) > width * fraction or abs(matrix[1, 2]) > height * fraction:
                     raise ValueError("translation exceeds 10 percent")
+                # 以反矩陣把 query 外形投影到對齊畫布，先確認所有工件點都留在畫面內。
                 forward = cv2.invertAffineTransform(matrix)
                 rows, cols = np.nonzero(_foreground(image))
                 if not len(rows):
@@ -83,6 +99,7 @@ class OpenCVRecipe:
                 if ((aligned_points[:, 0] < 0).any() or (aligned_points[:, 0] > width - 1).any()
                         or (aligned_points[:, 1] < 0).any() or (aligned_points[:, 1] > height - 1).any()):
                     raise ValueError("alignment would crop the workpiece")
+                # WARP_INVERSE_MAP 讓 OpenCV 以已知的反向取樣矩陣產生對齊影像。
                 image = cv2.warpAffine(
                     image, matrix, (width, height),
                     flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
@@ -93,6 +110,7 @@ class OpenCVRecipe:
                 metadata.update(alignment_failed=True, alignment_failure_reason=str(error))
         elif self.group == "PD":
             options = self.options["denoise_enhance"]
+            # LAB 的 L 是亮度；雙邊濾波與 CLAHE 只作用於 L，以減少對色彩瑕疵的干擾。
             lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
             luminance = cv2.bilateralFilter(
                 lab[:, :, 0], options["bilateral_d"], options["sigma_color"], options["sigma_space"],
@@ -103,6 +121,8 @@ class OpenCVRecipe:
         return np.ascontiguousarray(image), metadata
 
 
+# 將模型的連續異常圖回到原始 query 尺寸，回傳 float32 分數圖。
+# PG 成功時先撤銷對齊，再縮回原圖；失敗回退或 P0／PD 則只需尺寸回映。
 def inverse_anomaly_map(anomaly_map: np.ndarray, metadata: dict) -> np.ndarray:
     """Return a floating map in original query coordinates, before thresholding."""
     height, width = metadata["resized_size_hw"]

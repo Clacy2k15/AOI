@@ -1,3 +1,7 @@
+# 啟動前的部署自檢：確認模型檔、正常參考、15 產品設定、ROI 校驗及 CUDA 可用性。
+# 一般檢查只看大檔存在與大小；--full 會再次雜湊全部資源，較慢但能驗證內容。
+# 此工具不推論、不訓練、不下載；它核對的是「可否開始推論」，不是模型準確率。
+
 """Check the installed inference assets and all 15 configurations without training."""
 import argparse
 import json
@@ -7,6 +11,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from initialize_runtime import inside, sha
 
 
+# 逐一核對 release manifest 的資源、每產品的設定與訓練摘要，以及 capsule／pill 的 bundle。
+# 再檢查 PyTorch 能否看到 CUDA GPU 與三個本機 DLL，任一步失敗就拋出例外讓啟動停止。
 def check(root, full=False):
     import torch
     from aoi.common import load_config, load_inference
@@ -18,6 +24,7 @@ def check(root, full=False):
         path = inside(root, name)
         if not path.is_file() or path.stat().st_size != record['size']:
             raise ValueError('Missing/incomplete runtime asset: ' + name)
+        # 完整雜湊是可選操作；標準啟動避免每次都重讀全部約 8.79 GB 模型資源。
         if full and sha(path) != record['sha256']:
             raise ValueError('Runtime asset checksum mismatch: ' + name)
     for product, row in json.loads((root / 'outputs/expansion/product_registry.json').read_text(encoding='utf-8'))['products'].items():
@@ -30,6 +37,7 @@ def check(root, full=False):
         if product == 'pill':
             pill(config, settings)
         print('Configuration OK:', product)
+    # 目前偵測器明確呼叫 .cuda()，因此無法把沒有 CUDA 的環境誤報為已就緒。
     if not torch.cuda.is_available():
         raise RuntimeError('CUDA GPU unavailable. Install a compatible NVIDIA driver; this release requires CUDA inference.')
     for name in ('cublas64_12.dll', 'cublasLt64_12.dll', 'cudart64_12.dll'):
