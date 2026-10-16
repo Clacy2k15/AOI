@@ -1,0 +1,41 @@
+inherits: configs/aoi.yaml
+project:
+  category: tile
+  splits: splits/tile.json
+  output_root: outputs/products/tile
+  model_root: models/products/tile
+  inference_config: configs/products/tile/inference.yaml
+  cpu_threads: 6
+efficientad:
+  max_epochs: 1000
+  num_workers: 4
+  imagenette_workers: 4
+preprocessing:
+  geometry:
+    crop_guard: unverified
+classification:
+  labels:
+    '1': crack
+    '2': glue_strip
+    '3': gray_stroke
+    '4': oil
+    '5': rough
+    '6': unknown_defect
+  normal: Uniform speckled surface with dark spots distributed on a lighter background.
+  defects:
+    crack: Deep thin fissures, sometimes forming a branching pattern.
+    glue_strip: Adhesive or tape residue forming transparent or semitransparent irregular
+      areas.
+    gray_stroke: A dark gray smudge or stroke disrupting the normal speckled pattern.
+    oil: A translucent or discolored pooled resin/oil-like stain.
+    rough: Elongated irregular abrasion or rough surface patches disrupting the speckled
+      texture.
+  source_snapshots: outputs/expansion/source_snapshot_manifest.json
+  prompt_validation_status: not_evaluated_E0
+patchcore:
+  batch_size: 128
+  num_workers: 6
+loader:
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4

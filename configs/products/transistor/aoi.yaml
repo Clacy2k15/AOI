@@ -1,0 +1,41 @@
+inherits: configs/aoi.yaml
+project:
+  category: transistor
+  splits: splits/transistor.json
+  output_root: outputs/products/transistor
+  model_root: models/products/transistor
+  inference_config: configs/products/transistor/inference.yaml
+  cpu_threads: 6
+efficientad:
+  max_epochs: 1000
+  num_workers: 4
+  imagenette_workers: 4
+preprocessing:
+  geometry:
+    crop_guard: unverified
+classification:
+  labels:
+    '1': bent_lead
+    '2': cut_lead
+    '3': damaged_case
+    '4': misplaced
+    '5': unknown_defect
+  normal: Intact black package correctly positioned on the board, with three straight
+    properly arranged leads.
+  defects:
+    bent_lead: One lead is bent, crooked or misaligned while the component remains
+      properly positioned.
+    cut_lead: One lead is shortened or truncated, rather than merely bent.
+    damaged_case: Cracks, chips or missing material in the encapsulating package,
+      possibly exposing internal parts.
+    misplaced: The transistor is absent, incorrectly positioned/oriented, or has multiple
+      leads misaligned.
+  source_snapshots: outputs/expansion/source_snapshot_manifest.json
+  prompt_validation_status: not_evaluated_E0
+patchcore:
+  batch_size: 128
+  num_workers: 6
+loader:
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4

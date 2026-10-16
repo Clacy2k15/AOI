@@ -1,0 +1,379 @@
+{
+  "files": {
+    "outputs/training_summary.json": {
+      "status": "completed",
+      "splits_sha256": "a1bea0fc8bc8211b7d5e65d851d183957b70a39f53e44890703d54a7ebec32f8",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/bottle/training_summary.json": {
+      "status": "completed",
+      "product": "bottle",
+      "splits_sha256": "1315c8e65c2467df469c630b5251d0ae9748a9909ceafa76c957504cf6d46094",
+      "detector_config_sha256": "dc0c2876c444549d8c10a44c4eee7470396c2e0bc179cc2bc0643343ac38e330",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\bottle\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\bottle\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\bottle\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\bottle\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/carpet/training_summary.json": {
+      "status": "completed",
+      "product": "carpet",
+      "splits_sha256": "0f4305c5f151ac0cfb33a5b1cb50faac187eda80dd01d60283c00b2ee0da8fd2",
+      "detector_config_sha256": "3b4d923b1b3da4dad939386d73dafa28ae79b61826e29c5e59dd532dc7980fed",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\carpet\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\carpet\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\carpet\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\carpet\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/cable/training_summary.json": {
+      "status": "completed",
+      "product": "cable",
+      "splits_sha256": "fb653e18f49793658504be1e9f7c8452741c8c2b0c5468ce77ab9e3c095f9e99",
+      "detector_config_sha256": "eb5a228512fad4d6bf64602070b27c8d56c99c2bcbd9d33aea0d3d02df1851b3",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\cable\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\cable\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\cable\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\cable\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/capsule/training_summary.json": {
+      "status": "completed",
+      "product": "capsule",
+      "splits_sha256": "a9e12811f2b17d20a56efad10cfcbf8b9675f193a06ec71d341e80591294cee9",
+      "detector_config_sha256": "ba846d56244a9e667e72eb74e92e50fb6790781568023f340eec43f793324294",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\capsule\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\capsule\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\capsule\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\capsule\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/capsule_new_models_pixel_aupro_20261016/inference_calibrated.json": {
+      "product": "capsule",
+      "image_thresholds": {
+        "efficientad": 272.0010681152344,
+        "patchcore": 26.271146774291992
+      },
+      "efficientad": {
+        "checkpoint": "@AOI_ROOT@\\models\\experiments\\capsule_roi_mask_align_efficientad_20261016\\model.ckpt",
+        "preprocessing": "@AOI_ROOT@\\outputs\\capsule_roi_mask_align_efficientad_20261016\\preprocessing.json",
+        "thresholds": {
+          "pixel": -2.9269261360168457,
+          "image": 9.44210147857666
+        },
+        "status": "experiment_only_not_deployed",
+        "score": "maximum within remapped foreground plus margin",
+        "gate_floor": -78.36328430175782
+      },
+      "patchcore": {
+        "checkpoint": "@AOI_ROOT@\\models\\experiments\\capsule_roi_mask_align_20261016\\model.ckpt",
+        "preprocessing": "@AOI_ROOT@\\outputs\\capsule_roi_mask_align_20261016\\preprocessing.json",
+        "thresholds": {
+          "pixel": 26.46051025390625,
+          "image": 26.271146774291992
+        },
+        "status": "experiment_only_not_deployed",
+        "loader": "scripts/experiment_capsule_roi_patchcore.py evaluate",
+        "comparison": "@AOI_ROOT@\\outputs\\capsule_roi_mask_align_20261016\\comparison.json"
+      },
+      "preprocessing": "@AOI_ROOT@\\outputs\\capsule_roi_mask_align_efficientad_20261016\\preprocessing.json",
+      "preprocessing_code_sha256": "2b7ac64110b7b35086ab940b5109455668f49e9a4069b84a64bf39f484d2331d",
+      "source_sha256": {
+        "outputs\\capsule_roi_mask_align_efficientad_20261016\\candidate_inference.json": "3455dd7fa598936c3c4d57febdecec7128ec83dd1958b4bd1ce50cd41c573a80",
+        "outputs\\capsule_roi_mask_align_efficientad_20261016\\comparison.json": "c097e2696178de8f13afd76b5bb7daa7e129c7508d895870143a8827a79201d5",
+        "outputs\\capsule_roi_mask_align_efficientad_20261016\\dev_predictions.npz": "eff7997b37d08edc094b224223aea3fa2754de2f651cc6873f17413ddf1f3280",
+        "outputs\\capsule_roi_mask_align_efficientad_20261016\\dev_predictions.json": "41479cba6d7db15619f687ce0826e12858a665452c0a5c1f9658ab956095f0b0",
+        "outputs\\capsule_roi_mask_align_efficientad_20261016\\preprocessing.json": "8fa3702b4aeabd508608c9bc91f9898669bacfef3f9fa3411669c27960ac2cfd",
+        "models\\experiments\\capsule_roi_mask_align_efficientad_20261016\\model.ckpt": "c2509c9b434af134c0bcabfd1dedec3da201628f44164f794d03a3988fd3915d",
+        "outputs\\capsule_roi_mask_align_20261016\\candidate_inference.json": "9cdb8a3bf3b6b341ff175dd3387c5356f62bd6d8c4d426b5be2b30d52bedfe10",
+        "outputs\\capsule_roi_mask_align_20261016\\comparison.json": "5e5e9a90414d9714d08bfccdde990a82ca0d326b9102502b3e2480e8fc995f62",
+        "outputs\\capsule_roi_mask_align_20261016\\dev_predictions.npz": "3dd23eaa0792379793c5de0b960f313352d63350414594216a689df49bab4dbe",
+        "outputs\\capsule_roi_mask_align_20261016\\dev_predictions.json": "713a43837f3cdf64a497d65089c4e7b2bc51711bd529f43c6ed08227b425f8a6",
+        "outputs\\capsule_roi_mask_align_20261016\\preprocessing.json": "8fa3702b4aeabd508608c9bc91f9898669bacfef3f9fa3411669c27960ac2cfd",
+        "models\\experiments\\capsule_roi_mask_align_20261016\\model.ckpt": "14393d43bf4ee3c4cdd66ea394970537242ad9d292efd6fb5116595ebe32a16b",
+        "configs/products/capsule/inference.yaml": "c210ff3830e59bb4bc14cbaf692c1f87a77a492175a6d75006b3df9446618e96"
+      }
+    },
+    "outputs/products/grid/training_summary.json": {
+      "status": "completed",
+      "product": "grid",
+      "splits_sha256": "af9efd7ac06016bc148d1c32281d8c6ece33d603746cd433cf2a394b7b047947",
+      "detector_config_sha256": "c3f62af7b7a714005fd75868ec3ca3d0ec07e3532879c7cff00b767199fd6fb9",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\grid\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\grid\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\grid\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\grid\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/hazelnut/training_summary.json": {
+      "status": "completed",
+      "product": "hazelnut",
+      "splits_sha256": "8065ad83d96f9ac7e9d0e65746e0bac605fd14a6fa9ccc8e0d619cef39b58702",
+      "detector_config_sha256": "f0849ac98ae439673c7c7b918a8bd44724e8e2f2691391c04be86412a5e34362",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\hazelnut\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\hazelnut\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\hazelnut\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\hazelnut\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/leather/training_summary.json": {
+      "status": "completed",
+      "product": "leather",
+      "splits_sha256": "01c9a563c0ba1e0fc962cc8c303d36b9af96f30c2c68641db9e85757bcb7c711",
+      "detector_config_sha256": "2f9878747fc923c218eab8369e3e3707f68fca5e0a8bcd985e0964f73a56b6f8",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\leather\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\leather\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\leather\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\leather\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/pill/training_summary.json": {
+      "status": "completed",
+      "product": "pill",
+      "splits_sha256": "d826cea6e93db0642160fc920f3aba2af5318d22d6f14354cae1967dc4de1ea5",
+      "detector_config_sha256": "8f556aacc8f4b23ec0a5a9e570f53e072e83dcd95df71007622bb0230b9cdd84",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\pill\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\pill\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\pill\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\pill\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/pill_roi_align_patchcore_20261016/bundle.json": {
+      "product": "pill",
+      "variant": "PILL_ROI_ALIGN",
+      "checkpoint": "@AOI_ROOT@\\models\\experiments\\pill_roi_align_patchcore_20261016\\model.ckpt",
+      "checkpoint_sha256": "54996f2a66aaf2e2a131136647e9a795ae10d1b2ab60c843f0f4bb3793e9627a",
+      "preprocessing": "@AOI_ROOT@\\outputs\\pill_roi_align_patchcore_20261016\\preprocessing.json",
+      "preprocessing_sha256": "9435d5d3692faf0096e283ef7ba9ec43eaa300ee531d6123fb5042c81faa59d3",
+      "preprocessing_code_sha256": "ad57784f2bd8d66c3b69200fd5e2f4dec1c7c12710c9c7972c8ffab044065a9f",
+      "thresholds": {
+        "efficientad": {
+          "image": 0.3303241431713104,
+          "pixel": 10.101361274719238
+        },
+        "patchcore": {
+          "image": 38.77176284790039,
+          "pixel": 32.00163650512695
+        }
+      },
+      "calibration": "@AOI_ROOT@\\outputs\\pill_roi_align_patchcore_20261016\\calibration.json",
+      "split_sha256": "d826cea6e93db0642160fc920f3aba2af5318d22d6f14354cae1967dc4de1ea5",
+      "input_size_hw": [
+        256,
+        256
+      ],
+      "EfficientAD_retrained": false,
+      "final_test_used": false
+    },
+    "outputs/products/screw/training_summary.json": {
+      "status": "completed",
+      "product": "screw",
+      "splits_sha256": "5b3379e5b50a3064ec6bf95374edf0a38cb06ef57c96053dcf7038ebd9913a0f",
+      "detector_config_sha256": "80fccf7c48c971d54816566c5e779d5dea9e5a725f2bd1c1ccd2da1fd4ede3a8",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\screw\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\screw\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\screw\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\screw\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/tile/training_summary.json": {
+      "status": "completed",
+      "product": "tile",
+      "splits_sha256": "1eca5486c6cc095ee16348f5b4d8d31ad419c2472920615c7c708ec046fda4a4",
+      "detector_config_sha256": "38540425ad058ec1e2f0a1447b7a643c1978a4fa59ccf80cfe560877571237a1",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\tile\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\tile\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\tile\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\tile\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/toothbrush/training_summary.json": {
+      "status": "completed",
+      "product": "toothbrush",
+      "splits_sha256": "1078ae3ff2aa19162083808dd989235e840b752868e1bf4cd9bedc361e631b9d",
+      "detector_config_sha256": "b63ebf4623e6032748c217617a5583278a4a9d5e98d85f86eac001cf4e8e8643",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\toothbrush\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\toothbrush\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\toothbrush\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\toothbrush\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/transistor/training_summary.json": {
+      "status": "completed",
+      "product": "transistor",
+      "splits_sha256": "b0415cc5e9fc2deb22863ad8f491a55d10f7bb16865f3e02090363143939546f",
+      "detector_config_sha256": "00e5124ecd77346d1e5474b2affae78aa6bd3ce6abeb000784c90e34de9f03c3",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\transistor\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\transistor\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\transistor\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\transistor\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/wood/training_summary.json": {
+      "status": "completed",
+      "product": "wood",
+      "splits_sha256": "fd6b6fbc12132a2e9bea0841cd00d4667f2dcde430cde7c4aa716f10c9d89732",
+      "detector_config_sha256": "3b6a324e5fa23deca8d373c141ceda350e1b43842babfc888c338a7a9922185d",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\wood\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\wood\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\wood\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\wood\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    },
+    "outputs/products/zipper/training_summary.json": {
+      "status": "completed",
+      "product": "zipper",
+      "splits_sha256": "5de9d43b2ea1dc9ea212f4fd5c9276983ffe56f285607ef6109c5347ca258750",
+      "detector_config_sha256": "008b197e3108a73514839ac79e09930f22f5d46fc482a3825f3d3255f7149eb4",
+      "models": {
+        "efficientad": {
+          "model_path": "@AOI_ROOT@\\models\\products\\zipper\\efficientad\\model.ckpt"
+        },
+        "P0": {
+          "model_path": "@AOI_ROOT@\\models\\products\\zipper\\patchcore\\P0\\model.ckpt"
+        },
+        "PG": {
+          "model_path": "@AOI_ROOT@\\models\\products\\zipper\\patchcore\\PG\\model.ckpt"
+        },
+        "PD": {
+          "model_path": "@AOI_ROOT@\\models\\products\\zipper\\patchcore\\PD\\model.ckpt"
+        }
+      }
+    }
+  },
+  "bundle_configs": {
+    "configs/products/capsule/inference.yaml": "capsule_model_pair",
+    "configs/products/pill/inference.yaml": "pill_patchcore"
+  }
+}

@@ -1,0 +1,124 @@
+stage: E-Q
+calibration_split: dev
+selected_patchcore: PG
+thresholds:
+  efficientad:
+    image: 2.368206262588501
+    pixel: 4.251621246337891
+  patchcore:
+    image: 42.87404251098633
+    pixel: 39.42110061645508
+fusion:
+  decision: OR
+  mask: OR in original coordinates
+  minimum_region_area: 1
+normal_reference: data/mvtec_ad/leather/train/good/000.png
+qwen:
+  repo: unsloth/Qwen3.5-4B-GGUF
+  model_path: models/qwen_multicategory/Qwen3.5-4B-Multicategory-Q6_K.gguf
+  mmproj_path: models/qwen_multicategory/mmproj-F16.gguf
+  executable: models/llama.cpp/b11609/llama-server.exe
+  base_url: http://127.0.0.1:8080
+  gpu_layers: 99
+  ctx_size: 4096
+  parallel: 1
+  threads: 6
+  threads_batch: 6
+  batch_size: 512
+  ubatch_size: 128
+  image_long_edge: 448
+  image_max_tokens: 1024
+  enable_thinking: false
+  output_grammar: root ::= "1" | "2" | "3" | "4" | "5" | "6"
+  max_tokens: 64
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  min_p: 0
+  presence_penalty: 0
+  repeat_penalty: 1
+  seed: 42
+  request_timeout_seconds: 180
+  class_prompt: 'The detector may produce false alarms. Ignore the red annotation
+    when judging physical appearance.
+
+    Predicted locations may be wrong or missing; inspect the full original query and
+    normal reference.
+
+    Normal appearance: Consistent grain and uniform color with natural fine surface
+    texture.
+
+
+    Choose one class:
+
+    1 = color: A local abnormal light-gray or reddish discoloration contrasting with
+    the surrounding leather.
+
+    2 = cut: A slit or tear with a linear or curved opening extending beyond a puncture
+    point.
+
+    3 = fold: A raised strip or ridge caused by folding.
+
+    4 = glue: Transparent residue, a wet-looking mark or a darker patch of foreign
+    material.
+
+    5 = poke: A small isolated puncture hole or localized surface indentation (a depressed or sunken spot) without an extended slit or tear.
+
+    6 = unknown_defect: No clear defect, insufficient evidence, unsupported defect,
+    or ambiguous class.
+
+
+    Return exactly one complete class ID from 1, 2, 3, 4, 5, 6, with no other text.'
+  product: leather
+  labels:
+    '1': color
+    '2': cut
+    '3': fold
+    '4': glue
+    '5': poke
+    '6': unknown_defect
+  system_prompt: 'Classify visible anomalies in product leather using the supplied
+    images and class definitions.
+
+    Return exactly one class ID from 1, 2, 3, 4, 5, 6, with no other text.'
+  mask_source: patchcore_or_fallback
+product: leather
+aoi_config: configs/products/leather/aoi.yaml
+output_root: outputs/products/leather
+status: retrained_shared_all_products
+identity:
+  product: leather
+  split: dev
+  config_sha256: 7b7fe5630218fa06e3b7711544610fafbe240530801c3ddf0786017cf3f33d6d
+  splits_sha256: 01c9a563c0ba1e0fc962cc8c303d36b9af96f30c2c68641db9e85757bcb7c711
+dev_result_path: outputs/leather_poke_indentation_20261016/adopted_validation.json
+integration_summary: outputs/products/leather/stage_b_summary.json
+qwen_multicategory_summary: outputs/qwen_retrain_20261015/deployment.json
+pixel_calibration:
+  method: region_PRO_under_background_FPR
+  status: calibrated_dev
+  summary: outputs/expansion/pixel_calibration_aupro/leather/calibration.json
+  aupro_fpr_limit: 0.3
+  operating_background_fpr: 0.01
+  classification_validation: validated_current_pixels
+  previous_dev_result_path: outputs/expansion/qwen_finetune/leather/multicategory_validation.json
+  replaced_pixel_selection: null
+qwen_mask_source_review:
+  comparison: outputs/expansion/qwen_mask_source_review/patchcore_or_fallback/leather/comparison.json
+  selected_source: patchcore_or_fallback
+  adopted: true
+  classification_validation: completed_current_pixels
+qwen_shared_deployment:
+  policy: all_15_products_use_retrained_shared_pair_by_user_request
+  summary: outputs/qwen_retrain_20261015/deployment.json
+  vision_data: outputs/qwen_retrain_20261015/vision_data.json
+  training_summary: outputs/qwen_retrain_20261015/training_summary.json
+qwen_prompt_adoption:
+  status: adopted
+  date: '2026-10-16'
+  change: poke includes localized surface indentation (a depressed or sunken spot)
+  validation: outputs/leather_poke_indentation_20261016/validation.json
+  correct: 6
+  count: 6
+  previous_correct: 5
+  final_test_used: false

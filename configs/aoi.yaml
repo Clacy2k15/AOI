@@ -1,0 +1,55 @@
+project:
+  seed: 42
+  category: metal_nut
+  data_root: data/mvtec_ad
+  splits: splits.json
+  output_root: outputs
+  cpu_threads: 4
+  image_size: [256, 256]
+  accelerator: gpu
+  devices: 1
+  precision: 32-true
+efficientad:
+  model_size: small
+  teacher_out_channels: 384
+  batch_size: 1
+  num_workers: 4
+  imagenette_workers: 4
+  imagenette_dir: data/imagenette
+  max_steps: 70000
+  max_epochs: 1000
+  lr: 0.0001
+  weight_decay: 0.00001
+  scheduler_step_size: 66500
+  scheduler_gamma: 0.1
+  padding: false
+  pad_maps: true
+  calibration_quantiles: [0.9, 0.995]
+patchcore:
+  groups: [P0, PG, PD]
+  backbone: wide_resnet50_2
+  pre_trained: true
+  layers: [layer2, layer3]
+  coreset_sampling_ratio: 0.1
+  num_neighbors: 9
+  batch_size: 32
+  oom_fallback_batches: [16, 8]
+  num_workers: 6
+  max_epochs: 1
+preprocessing:
+  geometry:
+    motion: euclidean
+    iterations: 100
+    epsilon: 0.00001
+    max_rotation_degrees: 15
+    max_translation_fraction: 0.1
+  denoise_enhance:
+    bilateral_d: 5
+    sigma_color: 25
+    sigma_space: 3
+    clahe_clip_limit: 2.0
+    clahe_tile_grid: [8, 8]
+loader:
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 2

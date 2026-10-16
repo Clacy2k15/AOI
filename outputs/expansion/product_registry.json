@@ -1,0 +1,49 @@
+{
+  "products": {
+    "metal_nut": {
+      "config": "configs/aoi.yaml"
+    },
+    "bottle": {
+      "config": "configs/products/bottle/aoi.yaml"
+    },
+    "carpet": {
+      "config": "configs/products/carpet/aoi.yaml"
+    },
+    "cable": {
+      "config": "configs/products/cable/aoi.yaml"
+    },
+    "capsule": {
+      "config": "configs/products/capsule/aoi.yaml"
+    },
+    "grid": {
+      "config": "configs/products/grid/aoi.yaml"
+    },
+    "hazelnut": {
+      "config": "configs/products/hazelnut/aoi.yaml"
+    },
+    "leather": {
+      "config": "configs/products/leather/aoi.yaml"
+    },
+    "pill": {
+      "config": "configs/products/pill/aoi.yaml"
+    },
+    "screw": {
+      "config": "configs/products/screw/aoi.yaml"
+    },
+    "tile": {
+      "config": "configs/products/tile/aoi.yaml"
+    },
+    "toothbrush": {
+      "config": "configs/products/toothbrush/aoi.yaml"
+    },
+    "transistor": {
+      "config": "configs/products/transistor/aoi.yaml"
+    },
+    "wood": {
+      "config": "configs/products/wood/aoi.yaml"
+    },
+    "zipper": {
+      "config": "configs/products/zipper/aoi.yaml"
+    }
+  }
+}

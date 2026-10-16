@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "source_size_hw": [
+    1000,
+    1000
+  ],
+  "input_size_hw": [
+    256,
+    256
+  ],
+  "crop_xyxy": [
+    0,
+    284,
+    1000,
+    721
+  ],
+  "foreground_margin_pixels": 15,
+  "background_rgb": [
+    255,
+    255,
+    255
+  ],
+  "alignment": "PCA_rigid_translation_rotation_no_scale",
+  "clahe": false,
+  "bilateral": false,
+  "fit_population": "train_normal_only",
+  "train_count": 197,
+  "train_angle_range": [
+    -0.28450506155131816,
+    0.16170208523610663
+  ]
+}

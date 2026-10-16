@@ -1,0 +1,71 @@
+inherits: configs/aoi.yaml
+project:
+  category: pill
+  splits: splits/pill.json
+  output_root: outputs/products/pill
+  model_root: models/products/pill
+  inference_config: configs/products/pill/inference.yaml
+  cpu_threads: 6
+efficientad:
+  max_epochs: 1000
+  num_workers: 4
+  imagenette_workers: 4
+preprocessing:
+  geometry:
+    crop_guard: unverified
+classification:
+  labels:
+    '1': color
+    '2': combined
+    '3': contamination
+    '4': crack
+    '5': faulty_imprint
+    '6': pill_type
+    '7': scratch
+    '8': unknown_defect
+  instructions: Ignore image content outside the pill; judge only the pill itself.
+  normal: White oval pill with evenly distributed red speckles and an intact FF imprint.
+  defects:
+    color: Local abnormal colored spots, streaks or patches (e.g., blue, yellow, solid
+      red) distinct from normal red speckles.
+    combined: Two or more distinct severe defects clearly coexisting on the same pill.
+    contamination: A discrete 3D protruding lump, foreign fragment, or stuck chunk
+      sitting on the pill surface (often casting a slight shadow, such as a triangular
+      or irregular white solid piece on the flat face).
+    crack: Chipped, broken, or missing material along the outer edge/rim of the pill
+      (even if the FF imprint looks slightly faint, prioritize clear edge breakage
+      as crack).
+    faulty_imprint: The FF logo itself is severely missing, deformed, or incomplete,
+      with an intact outer edge and no surface lumps.
+    pill_type: Overall background pigmentation or texture across the entire pill differs
+      substantially from the normal white pill.
+    scratch: Surface scratches, linear grooves, or a scuffed/abraded rough patch on
+      the pill surface (including cluster-like surface abrasion above or around the
+      logo that roughens the smooth coating without adding a 3D lump).
+  source_snapshots: outputs/expansion/source_snapshot_manifest.json
+  prompt_validation_status: adopted_user_fixed_train_15_of_16_dev_6_of_8
+  prompt: |-
+    The detector may produce false alarms. Ignore the red annotation when judging physical appearance.
+    Predicted locations may be wrong or missing; inspect the full original query and normal reference.
+    Ignore image content outside the pill; judge only the pill itself.
+    Normal appearance: White oval pill with evenly distributed red speckles and an intact FF imprint.
+    If a scratch damages the FF imprint itself, classify it as 5 (faulty_imprint), not 7 (scratch). A scratch merely near the logo without damaging the FF imprint remains 7. Do not count the same scratch and its imprint damage as two distinct defects for 2 (combined).
+
+    Choose one class:
+    1 = color: Local abnormal colored spots, streaks or patches (e.g., blue, yellow, solid red) distinct from normal red speckles.
+    2 = combined: Two or more distinct severe defects clearly coexisting on the same pill.
+    3 = contamination: A discrete 3D protruding lump, foreign fragment, or stuck chunk sitting on the pill surface (often casting a slight shadow, such as a triangular or irregular white solid piece on the flat face).
+    4 = crack: Chipped, broken, or missing material along the outer edge/rim of the pill (even if the FF imprint looks slightly faint, prioritize clear edge breakage as crack).
+    5 = faulty_imprint: The FF logo itself is severely missing, deformed, or incomplete, with an intact outer edge and no surface lumps.
+    6 = pill_type: Overall background pigmentation or texture across the entire pill differs substantially from the normal white pill.
+    7 = scratch: Surface scratches, linear grooves, or a scuffed/abraded rough patch on the pill surface (including cluster-like surface abrasion above or around the logo that roughens the smooth coating without adding a 3D lump).
+    8 = unknown_defect: No clear defect, insufficient evidence, unsupported defect, or ambiguous class.
+
+    Return exactly one complete class ID from 1, 2, 3, 4, 5, 6, 7, 8, with no other text.
+patchcore:
+  batch_size: 128
+  num_workers: 6
+loader:
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4

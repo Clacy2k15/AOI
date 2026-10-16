@@ -1,0 +1,120 @@
+stage: E4
+calibration_split: dev
+selected_patchcore: PILL_ROI_ALIGN
+thresholds:
+  efficientad:
+    image: 0.3303241431713104
+    pixel: 10.101361274719238
+  patchcore:
+    image: 38.77176284790039
+    pixel: 32.00163650512695
+fusion:
+  decision: OR
+  mask: OR in original coordinates
+  minimum_region_area: 1
+normal_reference: data/mvtec_ad/pill/train/good/000.png
+qwen:
+  repo: unsloth/Qwen3.5-4B-GGUF
+  model_path: models/qwen_multicategory/Qwen3.5-4B-Multicategory-Q6_K.gguf
+  mmproj_path: models/qwen_multicategory/mmproj-F16.gguf
+  executable: models/llama.cpp/b11609/llama-server.exe
+  base_url: http://127.0.0.1:8080
+  gpu_layers: 99
+  ctx_size: 4096
+  parallel: 1
+  threads: 6
+  threads_batch: 6
+  batch_size: 512
+  ubatch_size: 128
+  image_long_edge: 448
+  image_max_tokens: 1024
+  enable_thinking: false
+  output_grammar: null
+  max_tokens: 64
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  min_p: 0
+  presence_penalty: 0
+  repeat_penalty: 1
+  seed: 42
+  request_timeout_seconds: 180
+  class_prompt: null
+  mask_source: patchcore_or_fallback
+product: pill
+aoi_config: configs/products/pill/aoi.yaml
+output_root: outputs/products/pill
+status: pill_roi_aligned_patchcore_calibrated_active
+identity:
+  product: pill
+  split: dev
+  config_sha256: 1df78446310ca78e217014b43b315ad0aae3917ccf17d2d09c11b6d71d60422d
+  splits_sha256: d826cea6e93db0642160fc920f3aba2af5318d22d6f14354cae1967dc4de1ea5
+dev_result_path: outputs/pill_qwen_ff_rule_official_20261016/validation.json
+integration_summary: outputs/products/pill/stage_b_summary.json
+description_review:
+  round: post_EQ_visual_review_20261015
+  adopted: false
+  comparison: outputs/expansion/qwen_description_review/pill/comparison.json
+pixel_threshold_review:
+  round: cached_dev_20261015
+  adopted: true
+  calibration: outputs/expansion/pixel_threshold_review/pill/pixel_calibration.json
+  product: pill
+  selected_by: explicit_user_instruction
+  selected_at: '2026-10-15T16:24:28.505817+08:00'
+  instruction: pill用新的門檻，其他保留
+  automatic_rule_passed: false
+  candidate_config: configs/products/pill/inference_pixel_review.yaml
+  comparison: outputs/expansion/pixel_threshold_review/pill/comparison.json
+  superseded_by: outputs/expansion/pixel_calibration_aupro/pill/calibration.json
+pixel_calibration:
+  method: region_PRO_under_background_FPR
+  status: calibrated_dev
+  summary: outputs/pill_roi_align_patchcore_20261016/calibration.json
+  aupro_fpr_limit: 0.3
+  operating_background_fpr: 0.01
+  classification_validation: completed_adopted_FF_rule_fixed_dev_6_of_8
+  previous_dev_result_path: outputs/products/pill/qwen_dev/pixel_threshold_review_validation.json
+  replaced_pixel_selection:
+    round: cached_dev_20261015
+    adopted: true
+    calibration: outputs/expansion/pixel_threshold_review/pill/pixel_calibration.json
+    product: pill
+    selected_by: explicit_user_instruction
+    selected_at: '2026-10-15T16:24:28.505817+08:00'
+    instruction: pill用新的門檻，其他保留
+    automatic_rule_passed: false
+    candidate_config: configs/products/pill/inference_pixel_review.yaml
+    comparison: outputs/expansion/pixel_threshold_review/pill/comparison.json
+qwen_mask_source_review:
+  comparison: outputs/expansion/qwen_mask_source_review/patchcore_or_fallback/pill/comparison.json
+  selected_source: patchcore_or_fallback
+  adopted: true
+  classification_validation: completed_adopted_FF_rule_fixed_dev_6_of_8
+qwen_multicategory_summary: outputs/qwen_retrain_20261015/deployment.json
+qwen_shared_deployment:
+  policy: all_15_products_use_retrained_shared_pair_by_user_request
+  summary: outputs/qwen_retrain_20261015/deployment.json
+  vision_data: outputs/qwen_retrain_20261015/vision_data.json
+  training_summary: outputs/qwen_retrain_20261015/training_summary.json
+previous_dev_result_path: outputs/qwen_retrain_20261015/pill/multicategory_validation.json
+pill_patchcore:
+  enabled: true
+  bundle: outputs/pill_roi_align_patchcore_20261016/bundle.json
+  bundle_sha256: 8749ffacd1289eba9fc6763e2bd1818ba1be12f5519e9f49957217b504e4b029
+  previous_inference: outputs/pill_roi_align_patchcore_20261016/inference.yaml.before
+  classification_validation: completed_adopted_FF_rule_fixed_dev_6_of_8
+detector_validation_path: outputs/pill_roi_align_patchcore_20261016/validation.json
+qwen_prompt_adoption:
+  source: outputs/pill_qwen_ff_rule_exact_recheck_20261016/class_prompt.txt
+  prompt_sha256: 21121ca7ac7d24318497c3886134ab2377a434f8fe66dbabe5dedef311cc6e7a
+  results: outputs/pill_qwen_ff_rule_exact_recheck_20261016/results.json
+  adoption: outputs/pill_qwen_ff_rule_official_20261016/adoption.json
+  train_correct: 15
+  train_count: 16
+  dev_correct: 6
+  dev_count: 8
+  prompt_tokens: 1150
+  instruction: 以這版為正式prompt
+  adopted_date: '2026-10-16'

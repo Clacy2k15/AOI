@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "product": "pill",
+  "source_size_hw": [
+    800,
+    800
+  ],
+  "input_size_hw": [
+    256,
+    256
+  ],
+  "crop_xyxy": [
+    0,
+    117,
+    800,
+    681
+  ],
+  "alignment": "PCA_long_axis_horizontal_rigid_translation_rotation_no_scale",
+  "rotation_180_disambiguation": false,
+  "resize": "bilinear_ROI_to_input",
+  "background_removal": false,
+  "clahe": false,
+  "bilateral": false,
+  "fit_population": "train_normal_only",
+  "train_count": 240,
+  "margin_fraction": 0.08,
+  "train_angle_range": [
+    -0.25233279512938567,
+    0.49872629477635483
+  ]
+}

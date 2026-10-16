@@ -1,0 +1,103 @@
+stage: E4
+calibration_split: dev
+selected_patchcore: P0
+thresholds:
+  efficientad:
+    image: 0.5883710980415344
+    pixel: 0.7304562926292419
+  patchcore:
+    image: 56.01078414916992
+    pixel: 44.93220901489258
+fusion:
+  decision: OR
+  mask: OR in original coordinates
+  minimum_region_area: 1
+normal_reference: data/mvtec_ad/hazelnut/train/good/000.png
+qwen:
+  repo: unsloth/Qwen3.5-4B-GGUF
+  model_path: models/qwen_multicategory/Qwen3.5-4B-Multicategory-Q6_K.gguf
+  mmproj_path: models/qwen_multicategory/mmproj-F16.gguf
+  executable: models/llama.cpp/b11609/llama-server.exe
+  base_url: http://127.0.0.1:8080
+  gpu_layers: 99
+  ctx_size: 4096
+  parallel: 1
+  threads: 6
+  threads_batch: 6
+  batch_size: 512
+  ubatch_size: 128
+  image_long_edge: 448
+  image_max_tokens: 1024
+  enable_thinking: false
+  output_grammar: null
+  max_tokens: 64
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  min_p: 0
+  presence_penalty: 0
+  repeat_penalty: 1
+  seed: 42
+  request_timeout_seconds: 180
+  class_prompt: null
+  mask_source: patchcore_or_fallback
+product: hazelnut
+aoi_config: configs/products/hazelnut/aoi.yaml
+output_root: outputs/products/hazelnut
+status: retrained_shared_all_products
+identity:
+  product: hazelnut
+  split: dev
+  config_sha256: fb9a16f4a6139d05f911b7cf4d284ccfe4982523f093e75f30f2cb81bd1002ae
+  splits_sha256: 8065ad83d96f9ac7e9d0e65746e0bac605fd14a6fa9ccc8e0d619cef39b58702
+dev_result_path: outputs/qwen_retrain_20261015/hazelnut/multicategory_validation.json
+integration_summary: outputs/products/hazelnut/stage_b_summary.json
+classification:
+  labels:
+    '1': crack
+    '2': cut
+    '3': hole
+    '4': print
+    '5': unknown_defect
+  normal: 'An intact brown shell has natural fine grooves, shading and a rough pale
+    basal cap. Natural grooves do not expose an open cavity. First inspect whether
+    shell material is split or missing: a pale fracture face is not white paint. A
+    continuous shell with no supported defect is unknown_defect.'
+  defects:
+    crack: An irregular split or broken opening in the shell, with separated jagged
+      edges, missing fragments or a visible dark interior. The broken shell cross-section
+      may be pale cream or white; this structural opening takes precedence over the
+      apparent light color.
+    cut: A comparatively straight narrow scored or scratched groove across the shell
+      surface, often darker, without the broad jagged open cavity of a broken shell.
+    hole: A small compact round or oval borehole with a localized perimeter; distinguish
+      it from an elongated ragged split with shell fragments.
+    print: A whitish printed mark, deposited substance or stain lying on a continuous
+      shell surface. The shell remains closed beneath the white mark; exposed pale
+      shell edges around a dark opening are crack, not print.
+  source_snapshots: outputs/expansion/qwen_description_review/sources.json
+  prompt_validation_status: one_post_EQ_visual_candidate
+description_review:
+  round: post_EQ_visual_review_20261015
+  adopted: true
+  comparison: outputs/expansion/qwen_description_review/hazelnut/comparison.json
+pixel_calibration:
+  method: region_PRO_under_background_FPR
+  status: calibrated_dev
+  summary: outputs/expansion/pixel_calibration_aupro/hazelnut/calibration.json
+  aupro_fpr_limit: 0.3
+  operating_background_fpr: 0.01
+  classification_validation: validated_current_pixels
+  previous_dev_result_path: outputs/products/hazelnut/qwen_dev/description_review_candidate_validation.json
+  replaced_pixel_selection: null
+qwen_mask_source_review:
+  comparison: outputs/expansion/qwen_mask_source_review/patchcore_or_fallback/hazelnut/comparison.json
+  selected_source: patchcore_or_fallback
+  adopted: true
+  classification_validation: completed_current_pixels
+qwen_multicategory_summary: outputs/qwen_retrain_20261015/deployment.json
+qwen_shared_deployment:
+  policy: all_15_products_use_retrained_shared_pair_by_user_request
+  summary: outputs/qwen_retrain_20261015/deployment.json
+  vision_data: outputs/qwen_retrain_20261015/vision_data.json
+  training_summary: outputs/qwen_retrain_20261015/training_summary.json

@@ -1,0 +1,32 @@
+inherits: configs/aoi.yaml
+project:
+  category: toothbrush
+  splits: splits/toothbrush.json
+  output_root: outputs/products/toothbrush
+  model_root: models/products/toothbrush
+  inference_config: configs/products/toothbrush/inference.yaml
+  cpu_threads: 6
+efficientad:
+  max_epochs: 1298
+  num_workers: 4
+  imagenette_workers: 4
+preprocessing:
+  geometry:
+    crop_guard: unverified
+classification:
+  labels:
+    '1': defective
+    '2': unknown_defect
+  normal: A normal toothbrush, compared with the supplied fixed normal reference.
+  defects:
+    defective: A visible toothbrush defect compared with the normal reference; the
+      dataset provides no defect subtypes.
+  source_snapshots: outputs/expansion/source_snapshot_manifest.json
+  prompt_validation_status: not_evaluated_E0
+patchcore:
+  batch_size: 128
+  num_workers: 6
+loader:
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4

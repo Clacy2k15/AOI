@@ -1,0 +1,41 @@
+inherits: configs/aoi.yaml
+project:
+  category: capsule
+  splits: splits/capsule.json
+  output_root: outputs/products/capsule
+  model_root: models/products/capsule
+  inference_config: configs/products/capsule/inference.yaml
+  cpu_threads: 6
+efficientad:
+  max_epochs: 1000
+  num_workers: 4
+  imagenette_workers: 4
+preprocessing:
+  geometry:
+    crop_guard: unverified
+classification:
+  labels:
+    '1': crack
+    '2': faulty_imprint
+    '3': poke
+    '4': scratch
+    '5': squeeze
+    '6': unknown_defect
+  normal: Smooth intact capsule with a legible 500 imprint; rotation of the black
+    section alone is acceptable.
+  defects:
+    crack: A fissure disrupting the shell, possibly exposing pale underlying material;
+      deeper than a superficial scratch.
+    faulty_imprint: The 500 imprint is smeared, incomplete or absent.
+    poke: A puncture or hole penetrating the shell, possibly exposing underlying material.
+    scratch: Superficial scratches or scuff marks without a penetrating shell breach.
+    squeeze: Squeezing, denting or warping of the capsule shape without a shell breach.
+  source_snapshots: outputs/expansion/source_snapshot_manifest.json
+  prompt_validation_status: not_evaluated_E0
+patchcore:
+  batch_size: 128
+  num_workers: 6
+loader:
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4

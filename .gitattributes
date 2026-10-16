@@ -1,0 +1,3 @@
+# Preserve calibration, split and preprocessing SHA256 across platforms.
+* -text
+*.png binary

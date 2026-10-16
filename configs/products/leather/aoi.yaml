@@ -1,0 +1,41 @@
+inherits: configs/aoi.yaml
+project:
+  category: leather
+  splits: splits/leather.json
+  output_root: outputs/products/leather
+  model_root: models/products/leather
+  inference_config: configs/products/leather/inference.yaml
+  cpu_threads: 6
+efficientad:
+  max_epochs: 1000
+  num_workers: 4
+  imagenette_workers: 4
+preprocessing:
+  geometry:
+    crop_guard: unverified
+classification:
+  labels:
+    '1': color
+    '2': cut
+    '3': fold
+    '4': glue
+    '5': poke
+    '6': unknown_defect
+  normal: Consistent grain and uniform color with natural fine surface texture.
+  defects:
+    color: A local abnormal light-gray or reddish discoloration contrasting with the
+      surrounding leather.
+    cut: A slit or tear with a linear or curved opening extending beyond a puncture
+      point.
+    fold: A raised strip or ridge caused by folding.
+    glue: Transparent residue, a wet-looking mark or a darker patch of foreign material.
+    poke: A small isolated puncture hole or localized surface indentation (a depressed or sunken spot) without an extended slit or tear.
+  source_snapshots: outputs/expansion/source_snapshot_manifest.json
+  prompt_validation_status: adopted_poke_indentation_dev_6_of_6_20261016
+patchcore:
+  batch_size: 128
+  num_workers: 6
+loader:
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4

@@ -1,0 +1,69 @@
+stage: E2
+calibration_split: dev
+selected_patchcore: P0
+thresholds:
+  efficientad:
+    image: 0.5132796764373779
+    pixel: 0.1304471641778946
+  patchcore:
+    image: 44.359256744384766
+    pixel: 42.483463287353516
+fusion:
+  decision: OR
+  mask: OR in original coordinates
+  minimum_region_area: 1
+normal_reference: data/mvtec_ad/cable/train/good/000.png
+qwen:
+  repo: unsloth/Qwen3.5-4B-GGUF
+  model_path: models/qwen_multicategory/Qwen3.5-4B-Multicategory-Q6_K.gguf
+  mmproj_path: models/qwen_multicategory/mmproj-F16.gguf
+  executable: models/llama.cpp/b11609/llama-server.exe
+  base_url: http://127.0.0.1:8080
+  gpu_layers: 99
+  ctx_size: 4096
+  parallel: 1
+  threads: 6
+  threads_batch: 6
+  batch_size: 512
+  ubatch_size: 128
+  image_long_edge: 448
+  image_max_tokens: 1024
+  enable_thinking: false
+  output_grammar: null
+  max_tokens: 64
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  min_p: 0
+  presence_penalty: 0
+  repeat_penalty: 1
+  seed: 42
+  request_timeout_seconds: 180
+  class_prompt: null
+  mask_source: patchcore_or_fallback
+product: cable
+aoi_config: configs/products/cable/aoi.yaml
+output_root: outputs/products/cable
+status: retrained_shared_all_products
+identity:
+  product: cable
+  split: dev
+  config_sha256: 281419c9e3e0325dfda430aee4dc7fbda5cffec82577e1fbd53579d339f39172
+  splits_sha256: fb653e18f49793658504be1e9f7c8452741c8c2b0c5468ce77ab9e3c095f9e99
+dev_result_path: outputs/qwen_retrain_20261015/cable/multicategory_validation.json
+integration_summary: outputs/products/cable/stage_b_summary.json
+description_review:
+  round: post_EQ_visual_review_20261015
+  adopted: false
+  comparison: outputs/expansion/qwen_description_review/cable/comparison.json
+qwen_mask_source_review:
+  comparison: outputs/expansion/qwen_mask_source_review/patchcore_or_fallback/cable/comparison.json
+  selected_source: patchcore_or_fallback
+  adopted: true
+  classification_validation: completed_current_pixels
+qwen_multicategory_summary: outputs/qwen_retrain_20261015/deployment.json
+qwen_shared_deployment:
+  policy: all_15_products_use_retrained_shared_pair_by_user_request
+  summary: outputs/qwen_retrain_20261015/deployment.json
+  vision_data: outputs/qwen_retrain_20261015/vision_data.json
+  training_summary: outputs/qwen_retrain_20261015/training_summary.json

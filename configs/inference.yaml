@@ -1,0 +1,99 @@
+stage: B
+calibration_split: dev
+selected_patchcore: PG
+thresholds:
+  efficientad:
+    image: 0.4452497065067291
+    pixel: 0.15918214619159698
+  patchcore:
+    image: 46.1533203125
+    pixel: 43.01803207397461
+fusion:
+  decision: OR
+  mask: OR in original coordinates
+  minimum_region_area: 1
+normal_reference: data/mvtec_ad/metal_nut/train/good/000.png
+qwen:
+  repo: unsloth/Qwen3.5-4B-GGUF
+  model_path: models/qwen_multicategory/Qwen3.5-4B-Multicategory-Q6_K.gguf
+  mmproj_path: models/qwen_multicategory/mmproj-F16.gguf
+  executable: models/llama.cpp/b11609/llama-server.exe
+  base_url: http://127.0.0.1:8080
+  gpu_layers: 99
+  ctx_size: 4096
+  parallel: 1
+  threads: 6
+  threads_batch: 6
+  batch_size: 512
+  ubatch_size: 128
+  image_long_edge: 448
+  image_max_tokens: 1024
+  enable_thinking: false
+  output_grammar: root ::= [1-5]
+  max_tokens: 64
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  min_p: 0
+  presence_penalty: 0
+  repeat_penalty: 1
+  seed: 42
+  request_timeout_seconds: 180
+  finetuned_from: unsloth/Qwen3.5-4B
+  finetune_split: outputs/qwen_finetune/split.json
+  class_prompt: 'The detector may produce false alarms. Ignore the red annotation
+    when judging physical color, shape, and surface marks.
+
+    If localization is missing, Image 3 has no contours. Inspect the full query image.
+
+    Compare the original query with the normal reference and consider the full nut
+    as well as the proposed regions.
+
+
+    Choose one class:
+
+    1 = bent: visible deformation of the nut body, outline, edge, or opening.
+
+    2 = color: abnormal surface color, discoloration, or color patches visible in
+    the original query. This includes narrow red, blue, or purple pigment streaks:
+    their abnormal hue makes them color even when they are thin lines.
+
+    3 = flip: the nut presents the opposite face compared with the expected normal
+    face; an ordinary in-plane rotation alone is not sufficient.
+
+    4 = scratch: visible scratches, scoring, or abrasion marks on the nut surface.
+
+    5 = unknown_defect: no clear visible defect, insufficient evidence, an unsupported
+    defect, or multiple equally plausible classes.
+
+
+    Your final answer must contain exactly one digit from 1 to 5, with no other text.'
+  prompt_sources:
+  - https://github.com/Sassanmtr/VELM/blob/main/configs/mvtec_ad_des.json
+  - https://arxiv.org/html/2505.02626v1#S3.SS2
+  prompt_method: VELM explicit defect descriptions; project adaptation clarifies narrow
+    chromatic contamination
+  mask_source: patchcore_or_fallback
+dev_result_path: outputs/qwen_retrain_20261015/metal_nut/multicategory_validation.json
+pixel_calibration:
+  method: region_PRO_under_background_FPR
+  status: calibrated_dev
+  summary: outputs/expansion/pixel_calibration_aupro/metal_nut/calibration.json
+  aupro_fpr_limit: 0.3
+  operating_background_fpr: 0.01
+  classification_validation: validated_current_pixels
+  previous_dev_result_path: null
+  replaced_pixel_selection: null
+aoi_config: configs/aoi.yaml
+qwen_mask_source_review:
+  comparison: outputs/expansion/qwen_mask_source_review/patchcore_or_fallback/metal_nut/comparison.json
+  selected_source: patchcore_or_fallback
+  adopted: true
+  classification_validation: completed_current_pixels
+status: retrained_shared_all_products
+qwen_multicategory_summary: outputs/qwen_retrain_20261015/deployment.json
+qwen_shared_deployment:
+  policy: all_15_products_use_retrained_shared_pair_by_user_request
+  summary: outputs/qwen_retrain_20261015/deployment.json
+  vision_data: outputs/qwen_retrain_20261015/vision_data.json
+  training_summary: outputs/qwen_retrain_20261015/training_summary.json
