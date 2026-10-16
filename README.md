@@ -28,7 +28,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 完全離線的新電腦還需要 Python 3.12 安裝程式、驅動及相同 Windows x64／Python 3.12 平台的 wheelhouse。可先在有網路的相同平台準備：
 
 ```powershell
-py -3.12 -m pip download --extra-index-url https://download.pytorch.org/whl/cu126 -r requirements.e5.lock.txt -d wheelhouse
+py -3.12 -m pip wheel --extra-index-url https://download.pytorch.org/whl/cu126 -r requirements.e5.lock.txt --wheel-dir wheelhouse
 .\setup.ps1 -Offline -AssetsDirectory 'D:\AOI-release-assets'
 ```
 

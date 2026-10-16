@@ -1,5 +1,6 @@
 """Launch the existing native llama-server; no Python model server."""
 import argparse
+from urllib.parse import urlsplit
 import json
 import subprocess
 import socket
@@ -28,7 +29,7 @@ def server_command(settings: dict) -> list[str]:
             raise FileNotFoundError(ROOT / options[key])
     return [str(executable), "--model", str(ROOT / options["model_path"]), "--mmproj", str(ROOT / options["mmproj_path"]),
             "--fit", "off", "--mmproj-offload", "-lv", "4",
-            "--alias", "aoi-qwen", "--host", "127.0.0.1", "--port", "8080", "--gpu-layers", str(options["gpu_layers"]),
+            "--alias", "aoi-qwen", "--host", "127.0.0.1", "--port", str(urlsplit(options["base_url"]).port or 8080), "--gpu-layers", str(options["gpu_layers"]),
             "--ctx-size", str(options["ctx_size"]), "--parallel", str(options["parallel"]), "--threads", str(options["threads"]),
             "--threads-batch", str(options["threads_batch"]), "--batch-size", str(options["batch_size"]),
             "--ubatch-size", str(options["ubatch_size"]), "--image-max-tokens", str(options["image_max_tokens"]),
@@ -58,7 +59,7 @@ if __name__ == "__main__":
         print("Stopped verified project Qwen server PID " + str(record["pid"]))
         sys.exit(0)
     with socket.socket() as probe:
-        occupied = probe.connect_ex(("127.0.0.1", 8080)) == 0
+        occupied = probe.connect_ex(("127.0.0.1", urlsplit(settings["qwen"]["base_url"]).port or 8080)) == 0
     if occupied:
         verify_server_model(settings["qwen"])
         print("Existing server verified against GGUF and mmproj; reuse it.")
