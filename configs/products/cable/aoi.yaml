@@ -10,33 +10,3 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': bent_wire
-    '2': cable_swap
-    '3': combined
-    '4': cut_inner_insulation
-    '5': cut_outer_insulation
-    '6': missing_cable
-    '7': missing_wire
-    '8': poke_insulation
-    '9': unknown_defect
-  normal: Three copper conductor cores with yellow-green, blue and brown inner insulation
-    inside a whitish outer sheath.
-  defects:
-    bent_wire: Irregularly bent or protruding copper strands; distinguish from missing
-      strands or damaged colored insulation.
-    cable_swap: An expected inner insulation color is replaced, missing or duplicated.
-    combined: Multiple visible defect types together, such as protruding copper strands
-      and cut outer insulation; retain this single dataset class.
-    cut_inner_insulation: Physical damage or deformation of the colored insulation
-      around a conductor core.
-    cut_outer_insulation: A visible cut in the whitish outer sheath.
-    missing_cable: One or more entire conductor cores, including their colored insulation,
-      are missing.
-    missing_wire: Copper strands are missing, reduced, eroded, blackened or corroded
-      within a core.
-    poke_insulation: A puncture, hole, rupture or crumbling area in the whitish outer
-      sheath.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0

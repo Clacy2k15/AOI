@@ -69,18 +69,16 @@ def artifact_identity(config: dict, split: str = "dev") -> dict:
 
 
 # 只對影響偵測器的配方計算 SHA256。
-# 排除 inference_config 路徑，讓僅修改 Qwen 提示的操作不會誤判偵測器訓練設定已改變。
+# 模型完整性僅取決於偵測器配方與資料切分。
 def detector_config_sha256(config: dict) -> str:
-    # Prompt edits must not invalidate identical detector weights/maps.
     project = {k:v for k,v in config["project"].items() if k != "inference_config"}
     settings = {"project": project, **{k:config[k] for k in ["efficientad","patchcore","preprocessing","loader"]}}
     return hashlib.sha256(json.dumps(settings, sort_keys=True).encode()).hexdigest()
 
 
-# 載入推論門檻及 Qwen 設定，核對產品、正常參考圖、類別 ID 是否與固定清單一致。
-# 再由 product_options 補齊提示及輸出文法；require_calibrated=True 時拒絕缺少門檻或未採用的組別。
+# 載入偵測門檻，核對產品及固定正常參考。
+# require_calibrated=True 時拒絕缺少門檻或未採用的模型組別。
 def load_inference(config: dict, path: str | Path | None = None, require_calibrated: bool = False) -> dict:
-    from aoi.velm import product_options
     settings = load_config(path or inference_path(config))
     product = config["project"]["category"]
     if settings.get("product", "metal_nut") != product:
@@ -88,11 +86,6 @@ def load_inference(config: dict, path: str | Path | None = None, require_calibra
     manifest = read_json(ROOT / config["project"]["splits"])
     if manifest["category"] != product or settings["normal_reference"] != manifest["normal_reference"]:
         raise ValueError("Product/reference conflicts with the fixed manifest")
-    # 優先採推論 YAML 的描述覆寫，但類別 ID 不可任意重排，否則模型答案將對到錯誤瑕疵。
-    classification = settings.get('classification', config.get('classification'))
-    if product != 'metal_nut' and classification.get('labels') != config['classification']['labels']:
-        raise ValueError('Inference descriptions may change; product class IDs must stay fixed')
-    settings["qwen"] = product_options(settings["qwen"], product, classification)
     # 一般組別與已啟用的 capsule／pill 專屬 ROI 組別分開列舉，避免跨產品誤用模型。
     allowed_groups = list(config["patchcore"]["groups"])
     if product == 'capsule' and settings.get('capsule_model_pair', {}).get('enabled'):

@@ -12,7 +12,7 @@ from initialize_runtime import inside, sha
 
 
 # 逐一核對 release manifest 的資源、每產品的設定與訓練摘要，以及 capsule／pill 的 bundle。
-# 再檢查 PyTorch 能否看到 CUDA GPU 與三個本機 DLL，任一步失敗就拋出例外讓啟動停止。
+# 再檢查 PyTorch 能否看到 CUDA GPU ，任一步失敗就拋出例外讓啟動停止。
 def check(root, full=False):
     import torch
     from aoi.common import load_config, load_inference
@@ -24,7 +24,7 @@ def check(root, full=False):
         path = inside(root, name)
         if not path.is_file() or path.stat().st_size != record['size']:
             raise ValueError('Missing/incomplete runtime asset: ' + name)
-        # 完整雜湊是可選操作；標準啟動避免每次都重讀全部約 8.79 GB 模型資源。
+        # 完整雜湊是可選操作；標準啟動避免每次都重讀偵測模型資源。
         if full and sha(path) != record['sha256']:
             raise ValueError('Runtime asset checksum mismatch: ' + name)
     for product, row in json.loads((root / 'outputs/expansion/product_registry.json').read_text(encoding='utf-8'))['products'].items():
@@ -40,9 +40,6 @@ def check(root, full=False):
     # 目前偵測器明確呼叫 .cuda()，因此無法把沒有 CUDA 的環境誤報為已就緒。
     if not torch.cuda.is_available():
         raise RuntimeError('CUDA GPU unavailable. Install a compatible NVIDIA driver; this release requires CUDA inference.')
-    for name in ('cublas64_12.dll', 'cublasLt64_12.dll', 'cudart64_12.dll'):
-        if not (root / 'models/llama.cpp/b11609' / name).is_file():
-            raise FileNotFoundError(name + '; rerun initialize_runtime.py')
     print('GPU:', torch.cuda.get_device_name(0))
     print('Runtime check passed. Start with start-demo.ps1.')
 

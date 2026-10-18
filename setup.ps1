@@ -1,6 +1,7 @@
-param([string]$AssetsDirectory = '', [switch]$Offline)
+param([string]$AssetsDirectory = '', [string]$ModelsFrom = '', [switch]$Offline)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
+if ($AssetsDirectory -and $ModelsFrom) { throw 'Choose either -AssetsDirectory or -ModelsFrom.' }
 function Run-Python {
     param([string[]]$Arguments)
     & '.\.venv\Scripts\python.exe' @Arguments
@@ -15,8 +16,10 @@ if ($Offline) {
 } else {
     Run-Python -Arguments @('-m','pip','install','--extra-index-url','https://download.pytorch.org/whl/cu126','-r','requirements.e5.lock.txt')
 }
-if ($Offline -and -not $AssetsDirectory) { throw '-Offline requires -AssetsDirectory with all model parts.' }
-if ($AssetsDirectory) {
+if ($Offline -and -not ($AssetsDirectory -or $ModelsFrom)) { throw '-Offline requires -AssetsDirectory or -ModelsFrom.' }
+if ($ModelsFrom) {
+    Run-Python -Arguments @('deployment/install_assets.py','--models-from',$ModelsFrom)
+} elseif ($AssetsDirectory) {
     Run-Python -Arguments @('deployment/install_assets.py','--from-dir',$AssetsDirectory)
 } else {
     Run-Python -Arguments @('deployment/install_assets.py')

@@ -13,21 +13,6 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': crack
-    '2': cut
-    '3': hole
-    '4': print
-    '5': unknown_defect
-  normal: Intact light-brown shell with natural small ridges and grooves.
-  defects:
-    crack: A visible fissure or break in the shell.
-    cut: A long linear cut or dark scratch mark on the shell surface.
-    hole: A small round borehole in the shell.
-    print: A whitish substance, printed mark or stain on the shell.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0
 patchcore:
   batch_size: 128
   num_workers: 6

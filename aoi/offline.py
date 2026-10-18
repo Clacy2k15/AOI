@@ -1,5 +1,5 @@
 # 推論程序的離線模式：停用套件自動連網與遙測，並限制 Python 的 DNS／TCP／UDP 目的地。
-# localhost 仍需開放，因為 Gradio GUI 與原生 Qwen server 透過本機 HTTP 溝通。
+# localhost 供 Gradio GUI 使用。
 # 安裝工具不呼叫此函式，才能在初次 setup 時下載套件與模型；原生程序不受 Python audit hook 攔截。
 
 """Local-only runtime: cached assets and loopback services, no Internet fallback."""

@@ -10,21 +10,3 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': color
-    '2': cut
-    '3': hole
-    '4': metal_contamination
-    '5': thread
-    '6': unknown_defect
-  normal: Uniform tightly woven carpet with intact fibers and consistent color.
-  defects:
-    color: Abnormal dark, blue or red stain absorbed in the fibers.
-    cut: A linear tear or cut interrupting the weave, possibly with missing threads.
-    hole: An open gap in the weave that does not primarily resemble a cut.
-    metal_contamination: A foreign metallic piece embedded in or lying across the
-      weave.
-    thread: An extra loose thread protruding from or lying on the surface.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0

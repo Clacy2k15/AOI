@@ -6,8 +6,9 @@ models/
 wheelhouse/
 outputs/**/predictions/
 outputs/demo/
-outputs/qwen_server*
 output/
+outputs/branch-validation/
+outputs/test-tmp/
 /outputs/training_summary.json
 /outputs/products/bottle/training_summary.json
 /outputs/products/carpet/training_summary.json

@@ -52,16 +52,7 @@ def initialize(root):
         path = inside(root, relative)
         settings = yaml.safe_load(path.read_text(encoding='utf-8'))
         settings[key]['bundle_sha256'] = sha(inside(root, settings[key]['bundle']))
-        path.write_text(yaml.safe_dump(settings, allow_unicode=True, sort_keys=False), encoding='utf-8')
-    # These three redistributable CUDA runtime libraries already come with pinned PyTorch.
-    import shutil
-    import torch
-    # 三個 DLL 來自剛安裝的固定版 torch/lib，不依賴作者電腦上的 .venv 或系統 PATH。
-    library = Path(torch.__file__).parent / 'lib'
-    for name in ('cublas64_12.dll', 'cublasLt64_12.dll', 'cudart64_12.dll'):
-        target = root / 'models/llama.cpp/b11609' / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(library / name, target)
+        path.write_text(yaml.safe_dump(settings, allow_unicode=True, sort_keys=False), encoding='utf-8', newline='\n')
     print('Runtime paths initialized for:', root)
 
 

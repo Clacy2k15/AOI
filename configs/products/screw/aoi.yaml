@@ -13,25 +13,6 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': manipulated_front
-    '2': scratch_head
-    '3': scratch_neck
-    '4': thread_side
-    '5': thread_top
-    '6': unknown_defect
-  normal: Intact slotted head, smooth cylindrical neck/shank and regular threads extending
-    to a pointed tip.
-  defects:
-    manipulated_front: Deformation at the thread tip, often flattened instead of pointed.
-    scratch_head: A scratch or damaged surface on the screw head.
-    scratch_neck: A scratch or deformity on the smooth neck/shank.
-    thread_side: Damaged or irregular serrated thread edges directed to the side.
-    thread_top: Damaged or irregular threading visible on the upper-facing thread
-      surface; distinguish by position/view from thread_side.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0
 patchcore:
   batch_size: 128
   num_workers: 6

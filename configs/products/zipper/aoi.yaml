@@ -13,30 +13,6 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': broken_teeth
-    '2': combined
-    '3': fabric_border
-    '4': fabric_interior
-    '5': rough
-    '6': split_teeth
-    '7': squeezed_teeth
-    '8': unknown_defect
-  normal: Uniform fabric tape with intact borders and evenly interlocking coil/teeth.
-  defects:
-    broken_teeth: Altered or damaged coil/teeth, including the sources' unusual shiny
-      surface cue or fabric lying over the teeth; inspect the teeth themselves.
-    combined: Multiple visible defects together, such as frayed fabric borders and
-      split or compressed teeth; retain one dataset class.
-    fabric_border: Fraying or unraveling confined to the outermost fabric tape edge.
-    fabric_interior: Fiber balls or pilling on fabric between the outer border and
-      coil, away from the edge.
-    rough: Rough, jagged surface or edges directly on the coil/teeth.
-    split_teeth: A locally separated/unzipped section creates a gap between the teeth.
-    squeezed_teeth: Compressed or pinched coil/teeth deform and may overlap horizontally.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0
 patchcore:
   batch_size: 128
   num_workers: 6

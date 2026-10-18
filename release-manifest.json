@@ -2,8 +2,179 @@
   "schema_version": 1,
   "repository": "Clacy2k15/AOI",
   "tag": "v1.0.0",
-  "scope": "new-image-inference",
+  "scope": "detection-only",
   "files": {
+    "models/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "5fd733e6251845f78e00ffc70b04bb087d07fd647fea92536b30b633e0cc09e8"
+    },
+    "models/patchcore/PG/model.ckpt": {
+      "size": 224286901,
+      "sha256": "18e1ef1a75561aec1bd591750b9ff26cff3cc9ccc52f83f2d31987c2a312b94a"
+    },
+    "models/products/bottle/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "2adb8d88700513b2e00a52a2e288807e28fd82413f45c33bf0ca80deb890fbfd"
+    },
+    "models/products/bottle/patchcore/PD/model.ckpt": {
+      "size": 217995445,
+      "sha256": "44dd5ebfb3eaf746c107609ee5281982645fde1957f4d67334216065bfc51aa9"
+    },
+    "models/products/carpet/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "43fcecbef03c935f3737d2f68eac473b6446bc61fe3173ee32dd78971a8e4033"
+    },
+    "models/products/carpet/patchcore/PG/model.ckpt": {
+      "size": 258257077,
+      "sha256": "f9797376398aff11bb3010684a1825b811c304842ba835570262a77ead0294c2"
+    },
+    "models/products/cable/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "b739d8d7c80ea92059ef810bbcce58e2c183f50801c4c490417db0bdf75a95cc"
+    },
+    "models/products/cable/patchcore/P0/model.ckpt": {
+      "size": 226173109,
+      "sha256": "b3d971ab71f694f4d237f57281d677d3feba6a484cf1410664d296a4c14d7f9d"
+    },
+    "models/experiments/capsule_roi_mask_align_efficientad_20261016/model.ckpt": {
+      "size": 32254733,
+      "sha256": "c2509c9b434af134c0bcabfd1dedec3da201628f44164f794d03a3988fd3915d"
+    },
+    "models/experiments/capsule_roi_mask_align_20261016/model.ckpt": {
+      "size": 223654069,
+      "sha256": "14393d43bf4ee3c4cdd66ea394970537242ad9d292efd6fb5116595ebe32a16b"
+    },
+    "models/products/grid/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "b885af577eb88eb5360f27130fc269ed039a26f875da64ead6a053e150d34f85"
+    },
+    "models/products/grid/patchcore/P0/model.ckpt": {
+      "size": 248819893,
+      "sha256": "9d3a6469a19d6a7c0a2c7a7c5cdbb9f4898b576c497e4256499a621db5c624b2"
+    },
+    "models/products/hazelnut/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "5e974cd497499a9f88516d19302c92d0f10b154d682bf83302562c5c7dc6fbc7"
+    },
+    "models/products/hazelnut/patchcore/P0/model.ckpt": {
+      "size": 320544949,
+      "sha256": "97574149ecbaa2c27ab0b58619d1804e30ccb8a4c77a4dce87a5fa5e8dbb7ff7"
+    },
+    "models/products/leather/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "0822c68bca7439fd147b350906784fa37a81b0417d28befdddd090714652550a"
+    },
+    "models/products/leather/patchcore/PG/model.ckpt": {
+      "size": 238129333,
+      "sha256": "e48b81da1c11003ab733bbc385f31406971ef62c2af1c5ed8598a7bf15b7ec69"
+    },
+    "models/products/pill/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "8ad14393e07bb2ef252c814cd681442b2e3872ce8612ab5bef8f957dd56d068a"
+    },
+    "models/experiments/pill_roi_align_patchcore_20261016/model.ckpt": {
+      "size": 250712245,
+      "sha256": "54996f2a66aaf2e2a131136647e9a795ae10d1b2ab60c843f0f4bb3793e9627a"
+    },
+    "models/products/screw/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "1d85e68f3b8712e56e775d03358a9e62aaf6f89943b1a5207e4fec4f8d04003d"
+    },
+    "models/products/screw/patchcore/PG/model.ckpt": {
+      "size": 280910005,
+      "sha256": "fbe3922dee3cd570caae1ab1148c881b94835d15fe14837691159199ce6b74b3"
+    },
+    "models/products/tile/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "8671664d939f67416ec43cbdc48361276d5e7b76264016fbf88da0480a89fca9"
+    },
+    "models/products/tile/patchcore/PG/model.ckpt": {
+      "size": 229945525,
+      "sha256": "231a76099e1d3f5c8bb80f58545397443cc4e0676c9b26d27970ddf85253d142"
+    },
+    "models/products/toothbrush/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "9e0ed0e621616a21f56b8d4b60906b1729af8f577ca09734dab848c38e886ab5"
+    },
+    "models/products/toothbrush/patchcore/PD/model.ckpt": {
+      "size": 133687477,
+      "sha256": "65583ca018471a728c94a008603d6e5d3771555229f9adcf08cc39d46844a2e1"
+    },
+    "models/products/transistor/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "2d54ae79e78c86882a84d13e4ffb2d3c3f5e478472fc37de047b3d1aba36231d"
+    },
+    "models/products/transistor/patchcore/PG/model.ckpt": {
+      "size": 219881653,
+      "sha256": "3df4cedec1dfd68e82cce76a645a00e2212938d64cfda0a0899043c8aa53b832"
+    },
+    "models/products/wood/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "cd4cc518273b01b641f8676c4d8aa5c40e5b5d89b32134140af497a2804d1a83"
+    },
+    "models/products/wood/patchcore/PD/model.ckpt": {
+      "size": 239382709,
+      "sha256": "5f5859583d1493ccbbb6f309ff4901b2f7c356a86b2f031765edae264cd3a511"
+    },
+    "models/products/zipper/efficientad/model.ckpt": {
+      "size": 32254733,
+      "sha256": "0200208ce34cb1136b8c973c4ded141e6d7469cd2b3f60a04abfaff079d3941b"
+    },
+    "models/products/zipper/patchcore/PD/model.ckpt": {
+      "size": 235610293,
+      "sha256": "78c6b1e10f236d88cfa7b674af8b12aba0e897b0502ca1493399319832c662fa"
+    }
+  },
+  "parts": [
+    {
+      "name": "aoi-runtime.zip.part001",
+      "size": 1073741824,
+      "sha256": "284423777ec970c350a1fb43c74a3f7ba71e0a569d383d9c699043077f756342"
+    },
+    {
+      "name": "aoi-runtime.zip.part002",
+      "size": 1073741824,
+      "sha256": "c526a82732bc3ffff6497f717e53977c0ce1df732a5d245b1504619cc1819c26"
+    },
+    {
+      "name": "aoi-runtime.zip.part003",
+      "size": 1073741824,
+      "sha256": "066f3b97ede3daf0a453536226e1695c91ac050818c70ca2a6d28f675aa4c29d"
+    },
+    {
+      "name": "aoi-runtime.zip.part004",
+      "size": 1073741824,
+      "sha256": "8d008946c779503e73f5d8dbba58572b5426eec65c0f2582be3275ce803d7f00"
+    },
+    {
+      "name": "aoi-runtime.zip.part005",
+      "size": 1073741824,
+      "sha256": "2c6193d7a3a0272ff13cbb6e5d97055dc9e0a2ba9ec365049391f7b6a16de375"
+    },
+    {
+      "name": "aoi-runtime.zip.part006",
+      "size": 1073741824,
+      "sha256": "5ff14cd28d89d0cdf84cbcfde447ec3dce6aef19ad4ff3da6ff01441441d0557"
+    },
+    {
+      "name": "aoi-runtime.zip.part007",
+      "size": 1073741824,
+      "sha256": "b4f81ecd3918d11a972c21889816ba82094a5fbffc0985536f11b49d5e59010b"
+    },
+    {
+      "name": "aoi-runtime.zip.part008",
+      "size": 1073741824,
+      "sha256": "c7cbb9c98256aeaa96fdb94c6d2b4a92d83347c967d12842e4019243dca335b1"
+    },
+    {
+      "name": "aoi-runtime.zip.part009",
+      "size": 199509836,
+      "sha256": "d6d3d75fae851a06bbb7a2e13b97b22c6f8f325d4d6a906221ef13bfe87ff7da"
+    }
+  ],
+  "archive_sha256": "441e324e89a7251518004128baaf031ed534dcfa4733525483f3a00361232e6b",
+  "source_freeze_id": "7157aea829dac03c9ee7f23f6d486010c3a43770580da721c9df62c8b0a677d4",
+  "archive_files": {
     "models/efficientad/model.ckpt": {
       "size": 32254733,
       "sha256": "5fd733e6251845f78e00ffc70b04bb087d07fd647fea92536b30b633e0cc09e8"
@@ -256,54 +427,5 @@
       "size": 1835008,
       "sha256": "911bced80dd36f9d827c13aede1c1cdf2f5397ee89b1455c9801feb0fd9a9774"
     }
-  },
-  "parts": [
-    {
-      "name": "aoi-runtime.zip.part001",
-      "size": 1073741824,
-      "sha256": "284423777ec970c350a1fb43c74a3f7ba71e0a569d383d9c699043077f756342"
-    },
-    {
-      "name": "aoi-runtime.zip.part002",
-      "size": 1073741824,
-      "sha256": "c526a82732bc3ffff6497f717e53977c0ce1df732a5d245b1504619cc1819c26"
-    },
-    {
-      "name": "aoi-runtime.zip.part003",
-      "size": 1073741824,
-      "sha256": "066f3b97ede3daf0a453536226e1695c91ac050818c70ca2a6d28f675aa4c29d"
-    },
-    {
-      "name": "aoi-runtime.zip.part004",
-      "size": 1073741824,
-      "sha256": "8d008946c779503e73f5d8dbba58572b5426eec65c0f2582be3275ce803d7f00"
-    },
-    {
-      "name": "aoi-runtime.zip.part005",
-      "size": 1073741824,
-      "sha256": "2c6193d7a3a0272ff13cbb6e5d97055dc9e0a2ba9ec365049391f7b6a16de375"
-    },
-    {
-      "name": "aoi-runtime.zip.part006",
-      "size": 1073741824,
-      "sha256": "5ff14cd28d89d0cdf84cbcfde447ec3dce6aef19ad4ff3da6ff01441441d0557"
-    },
-    {
-      "name": "aoi-runtime.zip.part007",
-      "size": 1073741824,
-      "sha256": "b4f81ecd3918d11a972c21889816ba82094a5fbffc0985536f11b49d5e59010b"
-    },
-    {
-      "name": "aoi-runtime.zip.part008",
-      "size": 1073741824,
-      "sha256": "c7cbb9c98256aeaa96fdb94c6d2b4a92d83347c967d12842e4019243dca335b1"
-    },
-    {
-      "name": "aoi-runtime.zip.part009",
-      "size": 199509836,
-      "sha256": "d6d3d75fae851a06bbb7a2e13b97b22c6f8f325d4d6a906221ef13bfe87ff7da"
-    }
-  ],
-  "archive_sha256": "441e324e89a7251518004128baaf031ed534dcfa4733525483f3a00361232e6b",
-  "source_freeze_id": "7157aea829dac03c9ee7f23f6d486010c3a43770580da721c9df62c8b0a677d4"
+  }
 }

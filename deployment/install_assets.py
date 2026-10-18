@@ -15,7 +15,10 @@ from initialize_runtime import inside, sha
 
 # 只解壓 manifest 明確列出的檔案，拒絕重複項目、越界路徑、符號連結及大小不一致的成員。
 # 每個檔案先寫 .installing 並核對 SHA256，通過後才替換正式目的檔，失敗時清掉暫存檔。
-def extract_verified(archive_path, root, expected):
+def extract_verified(archive_path, root, expected, selected=None):
+    selected = expected if selected is None else selected
+    if not set(selected).issubset(expected) or any(selected[k] != expected[k] for k in selected):
+        raise ValueError('Selected assets must match the archive manifest')
     with zipfile.ZipFile(archive_path) as archive:
         names = archive.namelist()
         # 解壓清單必須與 manifest 完全相等，不能只檢查「至少包含」必要模型。
@@ -26,6 +29,8 @@ def extract_verified(archive_path, root, expected):
             record = expected[info.filename]
             if info.file_size != record['size'] or (info.external_attr >> 16) & 0o170000 == 0o120000:
                 raise ValueError('Invalid archive member: ' + info.filename)
+            if info.filename not in selected:
+                continue
             target.parent.mkdir(parents=True, exist_ok=True)
             # 先寫臨時檔，避免下載／解壓中斷或校驗失敗時破壞使用者已安裝的同名權重。
             temporary = target.with_name(target.name + '.installing')
@@ -82,14 +87,42 @@ def install(root, source_directory=None):
     if digest.hexdigest() != manifest['archive_sha256']:
         archive.unlink(missing_ok=True)
         raise ValueError('Combined archive checksum mismatch')
-    extract_verified(archive, root, manifest['files'])
+    extract_verified(archive, root, manifest.get('archive_files', manifest['files']), manifest['files'])
     archive.unlink()
     print('All runtime files verified and extracted.', flush=True)
+
+
+def import_models(root, source):
+    """複製既有版本的偵測模型；來源只讀，每個檔案以 SHA256 核對。"""
+    manifest = json.loads((root / 'release-manifest.json').read_text(encoding='utf-8'))
+    for name, record in manifest['files'].items():
+        original = inside(source, name)
+        target = inside(root, name)
+        if not original.is_file() or original.stat().st_size != record['size'] or sha(original) != record['sha256']:
+            raise ValueError('Source model missing or corrupt: ' + name)
+        if target.is_file() and target.stat().st_size == record['size'] and sha(target) == record['sha256']:
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary = target.with_name(target.name + '.installing')
+        try:
+            shutil.copyfile(original, temporary)
+            if sha(temporary) != record['sha256']:
+                raise ValueError('Copied model checksum mismatch: ' + name)
+            temporary.replace(target)
+        finally:
+            temporary.unlink(missing_ok=True)
+    print('Detector models copied and verified; source files were not modified.')
 
 
 # --from-dir 指向所有 Release 分段所在資料夾；省略時才使用 GitHub 網路下載。
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--from-dir', type=Path, help='Local directory containing all Release parts')
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument('--from-dir', type=Path, help='Local directory containing all Release parts')
+    source.add_argument('--models-from', type=Path, help='Copy only verified detector models from an existing AOI installation')
     args = parser.parse_args()
-    install(Path(__file__).resolve().parents[1], args.from_dir)
+    root = Path(__file__).resolve().parents[1]
+    if args.models_from:
+        import_models(root, args.models_from.resolve())
+    else:
+        install(root, args.from_dir)

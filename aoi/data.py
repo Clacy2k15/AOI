@@ -38,7 +38,7 @@ class RecipeDataset(MVTecADDataset):
     """
 
     # 依產品資料根目錄建立資料集，從固定正常參考圖建立前處理配方。
-    # OpenCV 讀入是 BGR，需轉成 RGB 才能與推論及 Qwen 使用的顏色順序一致。
+    # OpenCV 讀入是 BGR，需轉成 RGB 才能與模型推論的顏色順序一致。
     def __init__(self, config: dict, manifest: dict, group: str, patchcore: bool):
         super().__init__(root=ROOT / config["project"]["data_root"],
                          category=config["project"]["category"], split=None)

@@ -107,7 +107,7 @@ class CapsuleDetector:
                 'inference_ms':inference_ms,'remap_ms':(time.perf_counter()-started)*1000}
 
     # 釋放此 adapter 持有的模型、回收 Python 物件並清空可釋放的 CUDA 快取。
-    # 只處理偵測器資源，不終止共用的原生 Qwen 程序。
+    # 只處理此 adapter 持有的偵測器資源。
     def close(self):
         import torch
         del self.model

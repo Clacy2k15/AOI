@@ -13,25 +13,6 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': crack
-    '2': glue_strip
-    '3': gray_stroke
-    '4': oil
-    '5': rough
-    '6': unknown_defect
-  normal: Uniform speckled surface with dark spots distributed on a lighter background.
-  defects:
-    crack: Deep thin fissures, sometimes forming a branching pattern.
-    glue_strip: Adhesive or tape residue forming transparent or semitransparent irregular
-      areas.
-    gray_stroke: A dark gray smudge or stroke disrupting the normal speckled pattern.
-    oil: A translucent or discolored pooled resin/oil-like stain.
-    rough: Elongated irregular abrasion or rough surface patches disrupting the speckled
-      texture.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0
 patchcore:
   batch_size: 128
   num_workers: 6

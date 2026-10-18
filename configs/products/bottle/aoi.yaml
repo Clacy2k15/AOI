@@ -10,19 +10,3 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': broken_large
-    '2': broken_small
-    '3': contamination
-    '4': unknown_defect
-  normal: Clean inner bore and an intact smooth glass rim and finish.
-  defects:
-    broken_large: A break in the outer rim/finish affecting about 20 percent or more
-      of its circumference.
-    broken_small: A small chip or break in the outer rim/finish affecting less than
-      about 20 percent of its circumference.
-    contamination: Foreign material or debris in the inner bore, rather than a broken
-      finish.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0

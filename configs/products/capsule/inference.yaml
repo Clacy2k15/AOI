@@ -1,5 +1,4 @@
-stage: E4
-calibration_split: dev
+product: capsule
 selected_patchcore: CAPSULE_ROI_MASK_ALIGN
 thresholds:
   efficientad:
@@ -13,82 +12,8 @@ fusion:
   mask: OR in original coordinates
   minimum_region_area: 1
 normal_reference: data/mvtec_ad/capsule/train/good/000.png
-qwen:
-  repo: unsloth/Qwen3.5-4B-GGUF
-  model_path: models/qwen_multicategory/Qwen3.5-4B-Multicategory-Q6_K.gguf
-  mmproj_path: models/qwen_multicategory/mmproj-F16.gguf
-  executable: models/llama.cpp/b11609/llama-server.exe
-  base_url: http://127.0.0.1:8080
-  gpu_layers: 99
-  ctx_size: 4096
-  parallel: 1
-  threads: 6
-  threads_batch: 6
-  batch_size: 512
-  ubatch_size: 128
-  image_long_edge: 448
-  image_max_tokens: 1024
-  enable_thinking: false
-  output_grammar: null
-  max_tokens: 64
-  temperature: 0.7
-  top_p: 0.8
-  top_k: 20
-  min_p: 0
-  presence_penalty: 0
-  repeat_penalty: 1
-  seed: 42
-  request_timeout_seconds: 180
-  class_prompt: null
-  mask_source: patchcore_or_fallback
-product: capsule
-aoi_config: configs/products/capsule/aoi.yaml
-output_root: outputs/products/capsule
-status: capsule_new_models_image_and_pixel_calibrated_active
-identity:
-  product: capsule
-  split: dev
-  config_sha256: 19deb255efc114887c87e67ef19eaebd2a718ca1a5aa212219757fbfd173cab5
-  splits_sha256: a9e12811f2b17d20a56efad10cfcbf8b9675f193a06ec71d341e80591294cee9
-dev_result_path: outputs/capsule_qwen_validation_new_models_20261016/validation.json
-integration_summary: outputs/products/capsule/stage_b_summary.json
-description_review:
-  round: post_EQ_visual_review_20261015
-  adopted: false
-  comparison: outputs/expansion/qwen_description_review/capsule/comparison.json
-qwen_mask_source_review:
-  comparison: outputs/expansion/qwen_mask_source_review/patchcore_or_fallback/capsule/comparison.json
-  selected_source: patchcore_or_fallback
-  adopted: true
-  classification_validation: completed_with_current_capsule_models_and_pixels
-  classification_validation_path: outputs/capsule_qwen_validation_new_models_20261016/validation.json
-qwen_multicategory_summary: outputs/qwen_retrain_20261015/deployment.json
-qwen_shared_deployment:
-  policy: all_15_products_use_retrained_shared_pair_by_user_request
-  summary: outputs/qwen_retrain_20261015/deployment.json
-  vision_data: outputs/qwen_retrain_20261015/vision_data.json
-  training_summary: outputs/qwen_retrain_20261015/training_summary.json
 capsule_model_pair:
   enabled: true
   variant: CAPSULE_ROI_MASK_ALIGN
   bundle: outputs/capsule_new_models_pixel_aupro_20261016/inference_calibrated.json
-  bundle_sha256: bec33f04da49c1d9384494dae4c688d2abddb026944041705d1821e0be5111d2
-  adopted_date: '2026-10-16'
-  previous_inference: outputs/capsule_new_models_pixel_aupro_20261016/inference.yaml.before
-previous_dev_result_path: outputs/qwen_retrain_20261015/capsule/multicategory_validation.json
-detector_validation_path: outputs/capsule_new_models_pixel_aupro_20261016/validation.json
-pixel_calibration:
-  metric: AU-PRO@0.30
-  split: dev
-  operating_background_fpr: 0.01
-  report: outputs/capsule_new_models_pixel_aupro_20261016/calibration.json
-  previous_inference: outputs/capsule_new_models_pixel_aupro_20261016/inference.yaml.before
-qwen_validation:
-  path: outputs/capsule_qwen_validation_new_models_20261016/validation.json
-  classification_dev_count: 18
-  original_Qwen_validation_count: 6
-  Qwen_training_seen_regression_count: 12
-  fresh_Qwen_calls: 21
-  pipeline_dev_count: 37
-  Qwen_closed_after_validation: true
-  final_test_used: false
+  bundle_sha256: db4cfc093eca0fca22a95bded709d772cddd21c9ba0b75c6a3d4aa93a01d12e2

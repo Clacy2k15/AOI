@@ -91,7 +91,7 @@ class PillPatchcore:
                 'inference_ms':inference_ms,'remap_ms':(time.perf_counter()-started)*1000}
 
     # 釋放模型引用並清理可釋放的 CUDA 記憶體。
-    # pipeline 切換產品時會呼叫此方法，共用 Qwen server 由另一層管理。
+    # pipeline 切換產品時會呼叫此方法，釋放目前模型資源。
     def close(self):
         import torch
         del self.model

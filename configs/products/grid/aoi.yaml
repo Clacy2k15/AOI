@@ -13,25 +13,6 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': bent
-    '2': broken
-    '3': glue
-    '4': metal_contamination
-    '5': thread
-    '6': unknown_defect
-  normal: Regular evenly spaced diamond-shaped cells formed by intact metal wires.
-  defects:
-    bent: Locally bent wires distort the regular cell geometry.
-    broken: Fractured wires leave a visible gap or disconnected segment.
-    glue: Glossy or semitransparent residue obscures the grid; an obstruction alone
-      need not be a broken wire.
-    metal_contamination: An extra irregular metallic piece or protrusion disrupts
-      the grid.
-    thread: Fine foreign fibers, loose threads or a knot cross the grid.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0
 patchcore:
   batch_size: 128
   num_workers: 6

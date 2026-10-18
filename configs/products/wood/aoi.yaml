@@ -13,24 +13,6 @@ efficientad:
 preprocessing:
   geometry:
     crop_guard: unverified
-classification:
-  labels:
-    '1': color
-    '2': combined
-    '3': hole
-    '4': liquid
-    '5': scratch
-    '6': unknown_defect
-  normal: Smooth reddish-brown wood with consistent straight grain and natural texture.
-  defects:
-    color: Abnormal ink/dye-like colored spots or smudges.
-    combined: Multiple visible defects together, such as holes, scratches and liquid;
-      retain one dataset class.
-    hole: Small round boreholes interrupt the surface.
-    liquid: Accumulated liquid/resin-like material disrupts the wood grain.
-    scratch: Abraded scratches, scuffs or gouges on the wood.
-  source_snapshots: outputs/expansion/source_snapshot_manifest.json
-  prompt_validation_status: not_evaluated_E0
 patchcore:
   batch_size: 128
   num_workers: 6
