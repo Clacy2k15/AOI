@@ -13,3 +13,11 @@
 - 原專案 184 個程式、設定及切分檔案 SHA256 與修改前相同。測試模型透過核對雜湊後複製到獨立 checkout，來源模型只讀。
 
 真實測試的本機詳細紀錄保存在獨立 checkout 的 `outputs/branch-validation/report.json`。本紀錄只驗證部署與既有結果一致性，不重新估計準確率；未建立全新 venv 或在另一台電腦驗證。
+
+## detection-only-v1.0.0 Release
+
+- 專屬資源 ZIP 僅含 30 個偵測 checkpoint，分為四段，總計 4,031,818,338 bytes；各模型 SHA256 與既有版本相同。沒有打包 Qwen、GGUF、mmproj 或 llama.cpp。
+- 在全新的原始碼資料夾，使用本版四個分段實際完成整包 SHA256 核對、解壓、路徑重建，以及 15 種產品與全部權重的完整校驗。
+- 從這次解壓安裝的模型執行 bottle、capsule、pill 各一張 OK／NG，共六張；判決與保存的原版結果相同，mask 逐像素一致，未匯入分類模組。
+- 13 項回歸測試通過；本機封裝與安裝紀錄位於 `outputs/github_detection_release_20261018/`。
+- README 明列完整版與精簡版的功能差異、分支、Release 與獨立資料夾安裝方式。

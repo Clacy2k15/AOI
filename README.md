@@ -1,12 +1,23 @@
 # AOI：OK／NG 與 mask
 
+## 版本選擇：本專案提供兩個版本
+
+| 版本 | 分支 | 功能 | Release |
+|---|---|---|---|
+| 完整版（含瑕疵分類） | [main](https://github.com/Clacy2k15/AOI/tree/main) | OK／NG、mask、定位疊圖，以及 VELM／Qwen 瑕疵名稱與分類信心 | [v1.0.1 完整版](https://github.com/Clacy2k15/AOI/releases/tag/v1.0.1) |
+| 精簡版（只做偵測） | [detection-only](https://github.com/Clacy2k15/AOI/tree/detection-only) | OK／NG、mask 與定位疊圖；不含瑕疵分類 | [detection-only-v1.0.0 精簡版](https://github.com/Clacy2k15/AOI/releases/tag/detection-only-v1.0.0) |
+
+兩版保留相同的 15 種產品偵測模型與門檻。精簡版不需要 VELM／Qwen、GGUF、mmproj 或 llama.cpp，並使用專屬的偵測模型下載包。請依需求選擇版本，**分別安裝到不同資料夾，避免覆蓋既有版本**。
+
+**本頁以下為精簡版的操作說明。**
+
 `detection-only` 是獨立的精簡分支，支援原本 15 種產品。介面與 CLI 只提供 OK／NG、原圖尺寸二值 mask、定位疊圖及結果下載。
 
 沿用已訓練的 EfficientAD＋PatchCore、逐產品前處理、選定模型及門檻。移除 VELM／Qwen 分類、分類信心、瑕疵名稱、三圖輸入、分類快取與服務啟動工具。推論不需要 GGUF、mmproj 或 llama.cpp。
 
 ## 獨立安裝
 
-請下載此分支到**新的資料夾**；原有版本可繼續使用。
+請從 [精簡版 Release](https://github.com/Clacy2k15/AOI/releases/tag/detection-only-v1.0.0) 下載 `aoi-detection-only-v1.0.0-source.zip` 或 `Source code (zip)`，解壓到**新的資料夾**；原有版本可繼續使用。
 
 需要 Windows x64、Python 3.12（含 `py` launcher）、支援 CUDA 的 NVIDIA GPU 與驅動。已驗證主機為 RTX 4070。初次安裝需要網路，安裝完成後可離線推論。
 
@@ -22,9 +33,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1 -ModelsFrom 'C:\
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
-大型資源沿用固定 `v1.0.0` Release，安裝器核對分段、整包與模型 SHA256，**只解壓並安裝偵測 checkpoint**。既有 Release 是共用整包，首次下載仍包含不使用的資源位元組；使用 `-ModelsFrom` 可避開整包下載。此分支不需要另行發布或變更原版模型。
+本版固定使用專屬 `detection-only-v1.0.0` Release，偵測模型包約 **4.03 GB、共 4 段**，只包含 30 個 EfficientAD／PatchCore checkpoint（含 capsule／pill ROI 模型），不含任何 Qwen／llama.cpp 資源。安裝器會自動下載，並核對分段、整包及模型 SHA256。已有模型時使用 `-ModelsFrom` 可避免重複下載。
 
-若已下載九個原版 Release 分段，可用 `-AssetsDirectory 'D:\assets'`。完全離線安裝另需依 `requirements.e5.lock.txt` 準備 `wheelhouse`，再加上 `-Offline`。
+手動下載時，請將本版四個 `aoi-detection-runtime.zip.part001`～`part004` 放在同一資料夾，再用 `-AssetsDirectory 'D:\assets'`。完全離線安裝另需依 `requirements.e5.lock.txt` 準備 `wheelhouse`，再加上 `-Offline`。
 
 ## 圖形介面
 
