@@ -1,5 +1,16 @@
 # AOI — 15 種產品離線瑕疵檢測
 
+## 版本選擇：本專案提供兩個版本
+
+| 版本 | 分支 | 功能 | Release |
+|---|---|---|---|
+| 完整版（含瑕疵分類） | [main](https://github.com/Clacy2k15/AOI/tree/main) | OK／NG、mask、定位疊圖，以及 VELM／Qwen 瑕疵名稱與分類信心 | [v1.0.1 完整版](https://github.com/Clacy2k15/AOI/releases/tag/v1.0.1) |
+| 精簡版（只做偵測） | [detection-only](https://github.com/Clacy2k15/AOI/tree/detection-only) | OK／NG、mask 與定位疊圖；不含瑕疵分類 | [detection-only-v1.0.0 精簡版](https://github.com/Clacy2k15/AOI/releases/tag/detection-only-v1.0.0) |
+
+兩版保留相同的 15 種產品偵測模型與門檻。精簡版不需要 VELM／Qwen、GGUF、mmproj 或 llama.cpp，並使用專屬的偵測模型下載包。請依需求選擇版本，**分別安裝到不同資料夾，避免覆蓋既有版本**。
+
+**本頁以下為完整版的操作說明。**
+
 使用已訓練的 EfficientAD、PatchCore 與微調 Qwen3.5-4B，在本機對新圖片判定 OK／NG、定位疑似瑕疵及分類。15 類產品需由使用者選擇；新圖片應具有與訓練資料相近的拍攝方式、尺寸和背景。
 
 v1.0.1 為全部 24 個 Python 檔案加入詳細中文註釋，涵蓋 134 個類別／函式／方法及重要演算法區塊；模型資源沿用 v1.0.0。
